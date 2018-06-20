@@ -20,7 +20,7 @@ func Draw(w io.Writer) {
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			img.Set(x, y, color.NRGBA{
+			img.Set(x, y, color.RGBA{
 				R: uint8((x + y) & 255),
 				G: uint8((x + y) << 1 & 255),
 				B: uint8((x + y) << 2 & 255),

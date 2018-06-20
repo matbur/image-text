@@ -14,10 +14,7 @@ func Foo() http.HandlerFunc {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 
-	//t := 3 * time.Second
-	//fmt.Fprint(w, "get after now ")
-	//time.Sleep(t)
-	//fmt.Fprintf(w, "get after %s", t)
 	w.Header().Set("Content-Disposition", `inline; filename="fname.png"`)
 	img.Draw(w)
+	// fmt.Fprintf(w, "%+v", r)
 }
