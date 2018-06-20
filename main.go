@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	//log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.DebugLevel)
 }
 
 func main() {
