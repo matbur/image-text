@@ -18,19 +18,28 @@ func Test_parseSize(t *testing.T) {
 		{
 			name: "size cannot be empty",
 			arg:  "",
-			err:  ErrorEmptySize,
+			err:  errorMissing,
 		}, {
 			name: "size should contain exactly 2 parts",
 			arg:  "234x23x243",
-			err:  ErrorMalformedSize,
+			err:  errorMalformed,
 		}, {
 			name: "each part should be an integer",
 			arg:  "200x300.243",
-			err:  ErrorMalformedSize,
+			err:  errorMalformed,
 		}, {
 			name: "size must contain positive values",
 			arg:  "200x0",
-			err:  ErrorMalformedSize,
+			err:  errorMalformed,
+		}, {
+			name: "size must be smaller than 1e6",
+			arg:  "1x1000000",
+			err:  errorMalformed,
+		}, {
+			name:   "should return proper big size",
+			arg:    "1x999999",
+			width:  1,
+			height: 999999,
 		}, {
 			name:   "should return proper size",
 			arg:    "200x300",

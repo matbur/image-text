@@ -9,33 +9,34 @@ import (
 )
 
 var (
-	ErrorEmptySize     = stdErr.New("size is empty")
-	ErrorMalformedSize = stdErr.New("malformed size")
-	ErrorUnexpected    = stdErr.New("unexpected error")
+	errorMissing    = stdErr.New("missing value")
+	errorMalformed  = stdErr.New("malformed")
+	errorUnexpected = stdErr.New("unexpected error")
 )
 
 var (
-	sizePattern = regexp.MustCompile(`^([1-9][0-9]*)x([1-9][0-9]*)$`)
+	sizePattern  = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
+	colorPattern = regexp.MustCompile(`^(?:[0-9A-Fa-f]{3}){1,2}$`)
 )
 
 func parseSize(s string) (int, int, error) {
 	if s == "" {
-		return 0, 0, ErrorEmptySize
+		return 0, 0, errors.Wrap(errorMissing, "color is empty")
 	}
 
 	ss := sizePattern.FindStringSubmatch(s)
 	if len(ss) != 3 {
-		return 0, 0, ErrorMalformedSize
+		return 0, 0, errors.Wrapf(errorMalformed, "size '%s' is not valid", s)
 	}
 
 	width, err := strconv.Atoi(ss[1])
-	if err != nil {
-		return 0, 0, errors.Wrap(ErrorUnexpected, "bad width")
+	if err != nil { // should never happen
+		return 0, 0, errors.Wrap(errorUnexpected, "bad width")
 	}
 
 	height, err := strconv.Atoi(ss[2])
-	if err != nil {
-		return 0, 0, errors.Wrap(ErrorUnexpected, "bad height")
+	if err != nil { // should never happen
+		return 0, 0, errors.Wrap(errorUnexpected, "bad height")
 	}
 
 	return width, height, nil
