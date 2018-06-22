@@ -1,22 +1,21 @@
 package img
 
 import (
-	"image/color"
 	stdErr "errors"
+	"github.com/pkg/errors"
+	"image/color"
 	"regexp"
 	"strconv"
-	"github.com/pkg/errors"
 )
 
 var (
-	ErrorEmptySize     = stdErr.New("size cannot be empty")
+	ErrorEmptySize     = stdErr.New("size is empty")
 	ErrorMalformedSize = stdErr.New("malformed size")
-	ErrorZeroValue     = stdErr.New("value is 0")
 	ErrorUnexpected    = stdErr.New("unexpected error")
 )
 
 var (
-	sizePattern = regexp.MustCompile(`^(\d+)x(\d+)$`)
+	sizePattern = regexp.MustCompile(`^([1-9][0-9]*)x([1-9][0-9]*)$`)
 )
 
 func parseSize(s string) (int, int, error) {
@@ -33,16 +32,10 @@ func parseSize(s string) (int, int, error) {
 	if err != nil {
 		return 0, 0, errors.Wrap(ErrorUnexpected, "bad width")
 	}
-	if width == 0 {
-		return 0, 0, errors.Wrap(ErrorZeroValue, "width is too small")
-	}
 
 	height, err := strconv.Atoi(ss[2])
 	if err != nil {
 		return 0, 0, errors.Wrap(ErrorUnexpected, "bad height")
-	}
-	if height == 0 {
-		return 0, 0, errors.Wrap(ErrorZeroValue, "height is too small")
 	}
 
 	return width, height, nil

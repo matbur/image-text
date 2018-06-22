@@ -1,10 +1,10 @@
 package img
 
 import (
+	"github.com/pkg/errors"
 	"image/color"
 	"reflect"
 	"testing"
-	"github.com/pkg/errors"
 )
 
 func Test_parseSize(t *testing.T) {
@@ -30,7 +30,7 @@ func Test_parseSize(t *testing.T) {
 		}, {
 			name: "size must contain positive values",
 			arg:  "200x0",
-			err:  ErrorZeroValue,
+			err:  ErrorMalformedSize,
 		}, {
 			name:   "should return proper size",
 			arg:    "200x300",
@@ -56,13 +56,11 @@ func Test_parseSize(t *testing.T) {
 }
 
 func Test_parseColor(t *testing.T) {
-	tests := []struct {
+	var tests []struct {
 		name    string
 		args    string
 		want    color.RGBA
 		wantErr bool
-	}{
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -79,13 +77,11 @@ func Test_parseColor(t *testing.T) {
 }
 
 func Test_parseText(t *testing.T) {
-	tests := []struct {
+	var tests []struct {
 		name    string
 		args    string
 		want    string
 		wantErr bool
-	}{
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
