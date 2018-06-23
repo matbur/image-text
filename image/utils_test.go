@@ -1,4 +1,4 @@
-package img
+package image
 
 import (
 	"github.com/pkg/errors"
@@ -68,7 +68,7 @@ func Test_parseColor(t *testing.T) {
 	tests := []struct {
 		name string
 		arg  string
-		want *color.RGBA
+		want color.Color
 		err  error
 	}{
 		{
@@ -94,27 +94,27 @@ func Test_parseColor(t *testing.T) {
 		}, {
 			name: "valid 3 char color",
 			arg:  "123",
-			want: &color.RGBA{R: 17, G: 34, B: 51, A: 255},
+			want: color.RGBA{R: 17, G: 34, B: 51, A: 255},
 		}, {
 			name: "minimal valid 3 char color",
 			arg:  "000",
-			want: &color.RGBA{R: 0, G: 0, B: 0, A: 255},
+			want: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 		}, {
 			name: "max valid 3 char color",
 			arg:  "fff",
-			want: &color.RGBA{R: 255, G: 255, B: 255, A: 255},
+			want: color.RGBA{R: 255, G: 255, B: 255, A: 255},
 		}, {
 			name: "valid 6 char color",
 			arg:  "abcdef",
-			want: &color.RGBA{R: 171, G: 205, B: 239, A: 255},
+			want: color.RGBA{R: 171, G: 205, B: 239, A: 255},
 		}, {
 			name: "minimal valid 6 char color",
 			arg:  "000000",
-			want: &color.RGBA{R: 0, G: 0, B: 0, A: 255},
+			want: color.RGBA{R: 0, G: 0, B: 0, A: 255},
 		}, {
 			name: "max valid 6 char color",
 			arg:  "ffffff",
-			want: &color.RGBA{R: 255, G: 255, B: 255, A: 255},
+			want: color.RGBA{R: 255, G: 255, B: 255, A: 255},
 		},
 	}
 	for _, tt := range tests {

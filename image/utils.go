@@ -1,4 +1,4 @@
-package img
+package image
 
 import (
 	stdErr "errors"
@@ -12,7 +12,7 @@ import (
 
 var (
 	errorMissing    = stdErr.New("missing value")
-	errorMalformed  = stdErr.New("malformed")
+	errorMalformed  = stdErr.New("malformed value")
 	errorUnexpected = stdErr.New("unexpected error")
 )
 
@@ -44,9 +44,13 @@ func parseSize(s string) (int, int, error) {
 	return width, height, nil
 }
 
-func parseColor(s string) (*color.RGBA, error) {
+func parseColor(s string) (color.Color, error) {
 	if s == "" {
 		return nil, errors.Wrap(errorMissing, "color is empty")
+	}
+
+	if c, ok := colors[s]; ok {
+		return c, nil
 	}
 
 	if !colorPattern.MatchString(s) {
@@ -80,7 +84,7 @@ func parseColor(s string) (*color.RGBA, error) {
 		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s'", ss[2])
 	}
 
-	return &color.RGBA{
+	return color.RGBA{
 		R: uint8(red),
 		G: uint8(green),
 		B: uint8(blue),
