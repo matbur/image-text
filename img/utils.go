@@ -32,12 +32,12 @@ func parseSize(s string) (int, int, error) {
 	}
 
 	width, err := strconv.Atoi(ss[1])
-	if err != nil { // should never happen
+	if err != nil {
 		return 0, 0, errors.Wrapf(errorUnexpected, "bad width '%s'", ss[1])
 	}
 
 	height, err := strconv.Atoi(ss[2])
-	if err != nil { // should never happen
+	if err != nil {
 		return 0, 0, errors.Wrapf(errorUnexpected, "bad height '%s'", ss[2])
 	}
 
@@ -61,22 +61,22 @@ func parseColor(s string) (*color.RGBA, error) {
 		ss[2] += ss[2]
 	} else if n == 6 {
 		ss = []string{s[0:2], s[2:4], s[4:6]}
-	} else { // should never happen
+	} else {
 		return nil, errors.Wrapf(errorUnexpected, "bad color '%s'", s)
 	}
 
 	red, err := strconv.ParseUint(ss[0], 16, 8)
-	if err != nil { // should never happen
+	if err != nil {
 		return nil, errors.Wrapf(errorUnexpected, "bad red '%s'", ss[0])
 	}
 
 	green, err := strconv.ParseUint(ss[1], 16, 8)
-	if err != nil { // should never happen
+	if err != nil {
 		return nil, errors.Wrapf(errorUnexpected, "bad green '%s'", ss[1])
 	}
 
 	blue, err := strconv.ParseUint(ss[2], 16, 8)
-	if err != nil { // should never happen
+	if err != nil {
 		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s'", ss[2])
 	}
 
