@@ -2,10 +2,12 @@ package img
 
 import (
 	stdErr "errors"
-	"github.com/pkg/errors"
 	"image/color"
 	"regexp"
 	"strconv"
+	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -21,7 +23,7 @@ var (
 
 func parseSize(s string) (int, int, error) {
 	if s == "" {
-		return 0, 0, errors.Wrap(errorMissing, "color is empty")
+		return 0, 0, errors.Wrap(errorMissing, "size is empty")
 	}
 
 	ss := sizePattern.FindStringSubmatch(s)
@@ -31,19 +33,59 @@ func parseSize(s string) (int, int, error) {
 
 	width, err := strconv.Atoi(ss[1])
 	if err != nil { // should never happen
-		return 0, 0, errors.Wrap(errorUnexpected, "bad width")
+		return 0, 0, errors.Wrapf(errorUnexpected, "bad width '%s'", ss[1])
 	}
 
 	height, err := strconv.Atoi(ss[2])
 	if err != nil { // should never happen
-		return 0, 0, errors.Wrap(errorUnexpected, "bad height")
+		return 0, 0, errors.Wrapf(errorUnexpected, "bad height '%s'", ss[2])
 	}
 
 	return width, height, nil
 }
 
-func parseColor(s string) (color.RGBA, error) {
-	return color.RGBA{}, nil
+func parseColor(s string) (*color.RGBA, error) {
+	if s == "" {
+		return nil, errors.Wrap(errorMissing, "color is empty")
+	}
+
+	if !colorPattern.MatchString(s) {
+		return nil, errors.Wrapf(errorMalformed, "color '%s' is not valid", s)
+	}
+
+	var ss []string
+	if n := len(s); n == 3 {
+		ss = strings.Split(s, "")
+		ss[0] += ss[0]
+		ss[1] += ss[1]
+		ss[2] += ss[2]
+	} else if n == 6 {
+		ss = []string{s[0:2], s[2:4], s[4:6]}
+	} else { // should never happen
+		return nil, errors.Wrapf(errorUnexpected, "bad color '%s'", s)
+	}
+
+	red, err := strconv.ParseUint(ss[0], 16, 8)
+	if err != nil { // should never happen
+		return nil, errors.Wrapf(errorUnexpected, "bad red '%s'", ss[0])
+	}
+
+	green, err := strconv.ParseUint(ss[1], 16, 8)
+	if err != nil { // should never happen
+		return nil, errors.Wrapf(errorUnexpected, "bad green '%s'", ss[1])
+	}
+
+	blue, err := strconv.ParseUint(ss[2], 16, 8)
+	if err != nil { // should never happen
+		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s'", ss[2])
+	}
+
+	return &color.RGBA{
+		R: uint8(red),
+		G: uint8(green),
+		B: uint8(blue),
+		A: 255,
+	}, nil
 }
 
 func parseText(s string) (string, error) {
