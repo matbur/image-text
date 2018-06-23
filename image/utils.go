@@ -26,6 +26,10 @@ func parseSize(s string) (int, int, error) {
 		return 0, 0, errors.Wrap(errorMissing, "size is empty")
 	}
 
+	if s, ok := sizes[s]; ok {
+		return parseSize(s)
+	}
+
 	ss := sizePattern.FindStringSubmatch(s)
 	if len(ss) != 3 {
 		return 0, 0, errors.Wrapf(errorMalformed, "size '%s' is not valid", s)
@@ -49,8 +53,8 @@ func parseColor(s string) (color.Color, error) {
 		return nil, errors.Wrap(errorMissing, "color is empty")
 	}
 
-	if c, ok := colors[s]; ok {
-		return c, nil
+	if v, ok := colors[s]; ok {
+		return parseColor(v)
 	}
 
 	if !colorPattern.MatchString(s) {
