@@ -2,6 +2,15 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/golang/freetype"
+  packages = [
+    "raster",
+    "truetype"
+  ]
+  revision = "e2365dfdc4a05e4b8299a783240d4a7d5a65d4e4"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -24,8 +33,6 @@
   name = "golang.org/x/image"
   packages = [
     "font",
-    "font/basicfont",
-    "font/plan9font",
     "math/fixed"
   ]
   revision = "af66defab954cb421ca110193eed9477c8541e2a"
@@ -42,6 +49,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0faa52ddee1133d722e1c9fe5e3de6ded3ce3f18f9e33ac32cce8398d7079449"
+  inputs-digest = "2979ed14b8706c3fd4a2c98866ad68f677196b4e91733c8767788aeeeeda2313"
   solver-name = "gps-cdcl"
   solver-version = 1

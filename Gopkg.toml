@@ -26,6 +26,10 @@
 
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/golang/freetype"
+
+[[constraint]]
   name = "github.com/pkg/errors"
   version = "0.8.0"
 

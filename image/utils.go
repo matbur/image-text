@@ -1,24 +1,14 @@
 package image
 
 import (
-	stdErr "errors"
 	"image/color"
-	"regexp"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/pkg/errors"
-)
-
-var (
-	errorMissing    = stdErr.New("missing value")
-	errorMalformed  = stdErr.New("malformed value")
-	errorUnexpected = stdErr.New("unexpected error")
-)
-
-var (
-	sizePattern  = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
-	colorPattern = regexp.MustCompile(`^(?:[0-9A-Fa-f]{3}){1,2}$`)
+	"golang.org/x/image/font"
 )
 
 func parseSize(s string) (int, int, error) {
@@ -37,12 +27,12 @@ func parseSize(s string) (int, int, error) {
 
 	width, err := strconv.Atoi(ss[1])
 	if err != nil {
-		return 0, 0, errors.Wrapf(errorUnexpected, "bad width '%s'", ss[1])
+		return 0, 0, errors.Wrapf(errorUnexpected, "bad width '%s': %v", ss[1], err)
 	}
 
 	height, err := strconv.Atoi(ss[2])
 	if err != nil {
-		return 0, 0, errors.Wrapf(errorUnexpected, "bad height '%s'", ss[2])
+		return 0, 0, errors.Wrapf(errorUnexpected, "bad height '%s': %v", ss[2], err)
 	}
 
 	return width, height, nil
@@ -75,17 +65,17 @@ func parseColor(s string) (color.Color, error) {
 
 	red, err := strconv.ParseUint(ss[0], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad red '%s'", ss[0])
+		return nil, errors.Wrapf(errorUnexpected, "bad red '%s': %v", ss[0], err)
 	}
 
 	green, err := strconv.ParseUint(ss[1], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad green '%s'", ss[1])
+		return nil, errors.Wrapf(errorUnexpected, "bad green '%s': %v", ss[1], err)
 	}
 
 	blue, err := strconv.ParseUint(ss[2], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s'", ss[2])
+		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s': %v", ss[2], err)
 	}
 
 	return color.RGBA{
@@ -96,6 +86,33 @@ func parseColor(s string) (color.Color, error) {
 	}, nil
 }
 
-func parseText(s string) (string, error) {
-	return "", nil
+func loadFont(fn string) (*truetype.Font, error) {
+	bb, err := ioutil.ReadFile(fn)
+	if err != nil {
+		return nil, errors.Wrapf(errorUnexpected, "failed to read file '%s': %v", fn, err)
+	}
+
+	fnt, err := truetype.Parse(bb)
+	if err != nil {
+		return nil, errors.Wrapf(errorUnexpected, "failed to parse font: %v", err)
+	}
+
+	return fnt, nil
+}
+
+func loadUbuntuMono() *truetype.Font {
+	fc, err := loadFont("res/UbuntuMono-Regular.ttf")
+	if err != nil {
+		panic(err)
+	}
+
+	return fc
+}
+
+func loadFace(size int) font.Face {
+	opts := &truetype.Options{
+		Size: float64(size),
+	}
+
+	return truetype.NewFace(ubuntuMono, opts)
 }
