@@ -14,6 +14,6 @@ func init() {
 
 func main() {
 	http.HandleFunc("/favicon.ico", server.HandleFavicon)
-	http.HandleFunc("/", server.Foo())
+	http.HandleFunc("/", server.HandleMain())
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

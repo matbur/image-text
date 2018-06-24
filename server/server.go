@@ -4,16 +4,18 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/matbur/image-text/image"
 )
 
-func Foo() http.HandlerFunc {
-	return dumpReq(
-		checkMethod("GET")(
-			handle))
+func HandleMain() http.HandlerFunc {
+	return dumpReq(checkMethod(http.MethodGet)(handle))
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
+
 	size, bg, fg, err := parsePath(r.URL.Path)
 	if err != nil {
 		writeJSON(w, err.Error(), http.StatusBadRequest)
@@ -34,9 +36,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Set("Content-Disposition", `inline; filename="fname.png"`)
-	// fmt.Fprintf(w, "%+v", r)
+	log.WithField("response", "binary").Infof("Response %d", http.StatusOK)
 }
 
 func HandleFavicon(w http.ResponseWriter, r *http.Request) {
