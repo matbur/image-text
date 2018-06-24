@@ -8,6 +8,7 @@ import (
 	"io"
 	"regexp"
 
+	"github.com/pkg/errors"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -35,17 +36,18 @@ type Image struct {
 func New(size, background, foreground, text string) (*Image, error) {
 	width, height, err := parseSize(size)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse size")
 	}
 
 	bg, err := parseColor(background)
 	if err != nil {
 		return nil, err
+		return nil, errors.Wrap(err, "failed to parse background color")
 	}
 
 	fg, err := parseColor(foreground)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse foreground color")
 	}
 
 	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
@@ -67,24 +69,29 @@ func (img *Image) Draw(w io.Writer) error {
 		}
 	}
 
-	if err := img.addLabel(); err != nil {
-		return err
-	}
+	img.addLabel()
 
 	if err := png.Encode(w, img); err != nil {
-		return err
+		return errors.Wrap(err, "failed to encode png")
 	}
 
 	return nil
 }
 
-func (img *Image) addLabel() error {
-	size := 32
-	face := loadFace(size)
+func (img *Image) addLabel() {
+	const scale = .95
+
+	height := int(scale * float64(minInt(img.Height, 2*img.Width/len(img.Text))))
+	face := loadFace(height)
+
+	width := font.MeasureString(face, img.Text).Round()
+	x := (img.Width - width) / 2
+
+	y := img.Height/2 + height/4
 
 	point := fixed.Point26_6{
-		X: fixed.Int26_6(img.Width / 2 << 6),
-		Y: fixed.Int26_6((img.Height/2 + size/4) << 6),
+		X: fixed.Int26_6(x << 6),
+		Y: fixed.Int26_6(y << 6),
 	}
 
 	d := &font.Drawer{
@@ -94,6 +101,4 @@ func (img *Image) addLabel() error {
 		Face: face,
 	}
 	d.DrawString(img.Text)
-
-	return nil
 }
