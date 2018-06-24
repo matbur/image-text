@@ -22,13 +22,13 @@ func writeJSON(w http.ResponseWriter, error string, code int) {
 		log.WithField("response", r).Errorf("Failed to marshal response: %v", err)
 		return
 	}
-	log.WithField("response", string(js)).Infof("Response %d", code)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if _, err := w.Write(js); err != nil {
 		log.Errorf("Failed to write response: %v", err)
 	}
+
+	log.WithField("response", string(js)).Infof("Response %d", code)
 }
 
 func dumpReq(h http.HandlerFunc) http.HandlerFunc {

@@ -3,6 +3,7 @@ package server
 import (
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -14,6 +15,8 @@ func HandleMain() http.HandlerFunc {
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
+	begin := time.Now()
+
 	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
 	size, bg, fg, err := parsePath(r.URL.Path)
@@ -36,7 +39,11 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.WithField("response", "binary").Infof("Response %d", http.StatusOK)
+
+	log.
+		WithField("response", "binary").
+		WithField("duration", time.Since(begin).String()).
+		Infof("Response %d", http.StatusOK)
 }
 
 func HandleFavicon(w http.ResponseWriter, r *http.Request) {
