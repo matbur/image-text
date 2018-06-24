@@ -49,8 +49,6 @@ func New(size, background, foreground, text string) (*Image, error) {
 }
 
 func (img *Image) Draw(w io.Writer) error {
-	// Create a colored image of the given width and height.
-
 	for y := 0; y < img.Height; y++ {
 		for x := 0; x < img.Width; x++ {
 			img.Set(x, y, img.Background)

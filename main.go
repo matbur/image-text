@@ -13,6 +13,7 @@ func init() {
 }
 
 func main() {
+	http.HandleFunc("/favicon.ico", server.HandleFavicon)
 	http.HandleFunc("/", server.Foo())
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
