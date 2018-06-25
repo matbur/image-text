@@ -16,7 +16,7 @@ func parseSize(s string) (int, int, error) {
 		return 0, 0, errors.Wrap(errorMissing, "size is empty")
 	}
 
-	if s, ok := sizes[s]; ok {
+	if s, ok := Sizes[s]; ok {
 		return parseSize(s)
 	}
 
@@ -43,7 +43,7 @@ func parseColor(s string) (color.Color, error) {
 		return nil, errors.Wrap(errorMissing, "color is empty")
 	}
 
-	if v, ok := colors[s]; ok {
+	if v, ok := Colors[s]; ok {
 		return parseColor(v)
 	}
 

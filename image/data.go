@@ -1,6 +1,6 @@
 package image
 
-var colors = map[string]string{
+var Colors = map[string]string{
 	"alice_blue":              "F0F8FF",
 	"antique_white":           "FAEBD7",
 	"aqua":                    "00FFFF",
@@ -151,7 +151,7 @@ var colors = map[string]string{
 	"yellow_green":            "9ACD32",
 }
 
-var sizes = map[string]string{
+var Sizes = map[string]string{
 	// Screen Standards
 	"cga":   "320x200",
 	"qvga":  "320x240",

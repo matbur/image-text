@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -16,6 +17,11 @@ func HandleMain() http.HandlerFunc {
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	begin := time.Now()
+
+	if r.URL.Path == "/" {
+		handleDocs(w, r)
+		return
+	}
 
 	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
@@ -52,4 +58,31 @@ func HandleFavicon(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, err.Error(), http.StatusInternalServerError)
 	}
 	w.Write(bb)
+}
+
+var docs = struct {
+	Path     string            `json:"path"`
+	Examples map[string]string `json:"example"`
+	Colors   map[string]string `json:"colors"`
+	Sizes    map[string]string `json:"sizes"`
+}{
+	Path: "HOST/size/background/foreground?text=rendered+text",
+	Examples: map[string]string{
+		"with_names": "http://localhost:8021/hd720/steel_blue/yellow?text=rendered+text",
+		"with_codes": "http://localhost:8021/320x200/000/FFFF00",
+	},
+	Colors: image.Colors,
+	Sizes:  image.Sizes,
+}
+
+func handleDocs(w http.ResponseWriter, r *http.Request) {
+	js, err := json.Marshal(docs)
+	if err != nil {
+		msg := "Internal Server Error"
+		log.WithError(err).Error(msg)
+		writeJSON(w, msg, http.StatusInternalServerError)
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(js)
 }
