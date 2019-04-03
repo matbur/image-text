@@ -12,7 +12,10 @@ import (
 )
 
 func HandleMain() http.HandlerFunc {
-	return dumpReq(checkMethod(http.MethodGet)(handle))
+	return chain(
+		dumpReq,
+		checkMethod(http.MethodGet),
+	)(handle)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {

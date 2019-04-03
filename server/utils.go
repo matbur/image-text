@@ -44,7 +44,18 @@ func dumpReq(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func checkMethod(methods ...string) func(http.HandlerFunc) http.HandlerFunc {
+type interceptor func(http.HandlerFunc) http.HandlerFunc
+
+func chain(fns ...interceptor) interceptor {
+	return func(fn http.HandlerFunc) http.HandlerFunc {
+		for i := len(fns); i > 0; i-- {
+			fn = fns[i-1](fn)
+		}
+		return fn
+	}
+}
+
+func checkMethod(methods ...string) interceptor {
 	msg := "Expected " + strings.Join(methods, ", ")
 	return func(h http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
