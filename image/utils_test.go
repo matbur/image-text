@@ -131,24 +131,3 @@ func Test_parseColor(t *testing.T) {
 		})
 	}
 }
-
-func Test_parseText(t *testing.T) {
-	var tests []struct {
-		name    string
-		args    string
-		want    string
-		wantErr bool
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseText(tt.args)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseText() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("parseText() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
