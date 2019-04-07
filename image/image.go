@@ -41,7 +41,6 @@ func New(size, background, foreground, text string) (*Image, error) {
 
 	bg, err := parseColor(background)
 	if err != nil {
-		return nil, err
 		return nil, errors.Wrap(err, "failed to parse background color")
 	}
 
