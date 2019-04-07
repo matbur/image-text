@@ -1,10 +1,11 @@
 package image
 
 import (
-	"github.com/pkg/errors"
 	"image/color"
 	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func Test_parseSize(t *testing.T) {

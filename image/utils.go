@@ -52,14 +52,15 @@ func parseColor(s string) (color.Color, error) {
 	}
 
 	var ss []string
-	if n := len(s); n == 3 {
+	switch len(s) {
+	case 3:
 		ss = strings.Split(s, "")
 		ss[0] += ss[0]
 		ss[1] += ss[1]
 		ss[2] += ss[2]
-	} else if n == 6 {
+	case 6:
 		ss = []string{s[0:2], s[2:4], s[4:6]}
-	} else {
+	default:
 		return nil, errors.Wrapf(errorUnexpected, "bad color '%s'", s)
 	}
 
