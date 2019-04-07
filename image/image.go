@@ -30,7 +30,7 @@ type Image struct {
 	Background color.Color
 	Foreground color.Color
 	Text       string
-	*image.RGBA
+	Canvas     *image.RGBA
 }
 
 func New(size, background, foreground, text string) (*Image, error) {
@@ -57,20 +57,20 @@ func New(size, background, foreground, text string) (*Image, error) {
 		Background: bg,
 		Foreground: fg,
 		Text:       text,
-		RGBA:       rgba,
+		Canvas:     rgba,
 	}, nil
 }
 
 func (img *Image) Draw(w io.Writer) error {
 	for y := 0; y < img.Height; y++ {
 		for x := 0; x < img.Width; x++ {
-			img.Set(x, y, img.Background)
+			img.Canvas.Set(x, y, img.Background)
 		}
 	}
 
 	img.addLabel()
 
-	if err := png.Encode(w, img); err != nil {
+	if err := png.Encode(w, img.Canvas); err != nil {
 		return errors.Wrap(err, "failed to encode png")
 	}
 
@@ -94,7 +94,7 @@ func (img *Image) addLabel() {
 	}
 
 	d := &font.Drawer{
-		Dst:  img,
+		Dst:  img.Canvas,
 		Src:  image.NewUniform(img.Foreground),
 		Dot:  point,
 		Face: face,
