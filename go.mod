@@ -7,5 +7,5 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.0
-	golang.org/x/image v0.0.0-20190321063152-3fc05d484e9f
+	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
 )
