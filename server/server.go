@@ -2,8 +2,8 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -56,7 +56,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleFavicon(w http.ResponseWriter, r *http.Request) {
-	bb, err := ioutil.ReadFile("res/favicon.png")
+	bb, err := os.ReadFile("res/favicon.png")
 	if err != nil {
 		writeJSON(w, err.Error(), http.StatusInternalServerError)
 	}

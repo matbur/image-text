@@ -1,13 +1,15 @@
-# build stage
-FROM golang:alpine AS build-env
-# ADD . /src
-WORKDIR /go/src/github.com/matbur/image-text
-COPY . .
-RUN go build -o app
+FROM golang:1.23-alpine3.20 AS build-env
 
-# final stage
-FROM alpine
 WORKDIR /app
-COPY --from=build-env /go/src/github.com/matbur/image-text/app .
-COPY --from=build-env /go/src/github.com/matbur/image-text/res res
-ENTRYPOINT ./app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -o app ./cmd/image-text
+
+FROM alpine:3.20
+WORKDIR /app
+COPY --from=build-env app .
+CMD ["./app"]
+

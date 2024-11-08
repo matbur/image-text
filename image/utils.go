@@ -2,13 +2,14 @@ package image
 
 import (
 	"image/color"
-	"io/ioutil"
 	"strconv"
 	"strings"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/pkg/errors"
 	"golang.org/x/image/font"
+
+	"github.com/matbur/image-text/resources"
 )
 
 func parseSize(s string) (int, int, error) {
@@ -88,7 +89,7 @@ func parseColor(s string) (color.Color, error) {
 }
 
 func loadFont(fn string) (*truetype.Font, error) {
-	bb, err := ioutil.ReadFile(fn)
+	bb, err := resources.Static.ReadFile(fn)
 	if err != nil {
 		return nil, errors.Wrapf(errorUnexpected, "failed to read file '%s': %v", fn, err)
 	}
@@ -102,7 +103,7 @@ func loadFont(fn string) (*truetype.Font, error) {
 }
 
 func loadUbuntuMono() *truetype.Font {
-	fc, err := loadFont("res/UbuntuMono-Regular.ttf")
+	fc, err := loadFont("UbuntuMono-Regular.ttf")
 	if err != nil {
 		panic(err)
 	}

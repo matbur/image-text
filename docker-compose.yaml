@@ -1,0 +1,8 @@
+services:
+  image-text:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8022:8022"
+    environment:
+      - ADDR=:8022
