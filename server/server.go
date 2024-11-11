@@ -2,13 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/matbur/image-text/resources"
+	"log/slog"
 	"net/http"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/matbur/image-text/image"
+	"github.com/matbur/image-text/resources"
 )
 
 func HandleMain() http.HandlerFunc {
@@ -49,19 +48,23 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.
-		WithField("response", "binary").
-		WithField("duration", time.Since(begin).String()).
-		Infof("Response %d", http.StatusOK)
+	slog.With(
+		"response", "binary",
+		"duration", time.Since(begin).String(),
+		"status", http.StatusOK,
+	).Info("Response")
 }
 
 func HandleFavicon(w http.ResponseWriter, r *http.Request) {
 	bb, err := resources.Static.ReadFile("favicon.png")
 	if err != nil {
-		log.Error(err)
+		slog.Error("Failed to load favicon", "err", err)
 		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
-	w.Write(bb)
+	if _, err := w.Write(bb); err != nil {
+		slog.Error("Failed to write favicon", "err", err)
+	}
 }
 
 var docs = struct {
@@ -82,11 +85,12 @@ var docs = struct {
 func handleDocs(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(docs)
 	if err != nil {
-		msg := "Internal Server Error"
-		log.WithError(err).Error(msg)
-		writeJSON(w, msg, http.StatusInternalServerError)
+		slog.Error("Failed to marshal docs", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	w.Write(js)
+	if _, err := w.Write(js); err != nil {
+		slog.Error("Failed to write docs", "err", err)
+	}
 }

@@ -2,9 +2,8 @@ package server
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type errResponse struct {
@@ -16,14 +15,14 @@ func writeJSON(w http.ResponseWriter, error string, code int) {
 	js, err := json.Marshal(r)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		log.WithField("response", r).Errorf("Failed to marshal response: %v", err)
+		slog.Error("Failed to marshal response", "err", err, "response", r)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if _, err := w.Write(js); err != nil {
-		log.Errorf("Failed to write response: %v", err)
+		slog.Error("Failed to write response", "err", err)
 	}
 
-	log.WithField("response", string(js)).Infof("Response %d", code)
+	slog.Info("Response", "status", code, "response", string(js))
 }

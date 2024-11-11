@@ -1,11 +1,10 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type interceptor func(http.HandlerFunc) http.HandlerFunc
@@ -19,29 +18,29 @@ func chain(fns ...interceptor) interceptor {
 	}
 }
 
-func dumpReq(h http.HandlerFunc) http.HandlerFunc {
+func dumpReq(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dumped, err := httputil.DumpRequest(r, false)
 		if err != nil {
-			log.WithField("request", r).Infof("failed to dump request: %v", err)
+			slog.Error("Failed to dump request", "request", r, "err", err)
 		} else {
-			log.WithField("request", string(dumped)).Infof("%s %s", r.Method, r.URL)
+			slog.Info("Request", "request", string(dumped))
 		}
 
-		h(w, r)
+		next(w, r)
 	}
 }
 
 func checkMethod(methods ...string) interceptor {
 	msg := "Expected " + strings.Join(methods, ", ")
-	return func(h http.HandlerFunc) http.HandlerFunc {
+	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if !isIn(r.Method, methods) {
 				writeJSON(w, msg, http.StatusMethodNotAllowed)
 				return
 			}
 
-			h(w, r)
+			next(w, r)
 		}
 	}
 }
