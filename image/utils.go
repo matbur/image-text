@@ -1,12 +1,12 @@
 package image
 
 import (
+	"fmt"
 	"image/color"
 	"strconv"
 	"strings"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/pkg/errors"
 	"golang.org/x/image/font"
 
 	"github.com/matbur/image-text/resources"
@@ -14,7 +14,7 @@ import (
 
 func parseSize(s string) (int, int, error) {
 	if s == "" {
-		return 0, 0, errors.Wrap(errorMissing, "size is empty")
+		return 0, 0, fmt.Errorf("size is empty: %w", errorMissing)
 	}
 
 	if s, ok := Sizes[s]; ok {
@@ -23,17 +23,17 @@ func parseSize(s string) (int, int, error) {
 
 	ss := sizePattern.FindStringSubmatch(s)
 	if len(ss) != 3 {
-		return 0, 0, errors.Wrapf(errorMalformed, "size '%s' is not valid", s)
+		return 0, 0, fmt.Errorf("size '%s' is not valid: %w", s, errorMalformed)
 	}
 
 	width, err := strconv.Atoi(ss[1])
 	if err != nil {
-		return 0, 0, errors.Wrapf(errorUnexpected, "bad width '%s': %v", ss[1], err)
+		return 0, 0, fmt.Errorf("bad width '%s': %v: %w", ss[1], err, errorUnexpected)
 	}
 
 	height, err := strconv.Atoi(ss[2])
 	if err != nil {
-		return 0, 0, errors.Wrapf(errorUnexpected, "bad height '%s': %v", ss[2], err)
+		return 0, 0, fmt.Errorf("bad height '%s': %v: %w", ss[2], err, errorUnexpected)
 	}
 
 	return width, height, nil
@@ -41,7 +41,7 @@ func parseSize(s string) (int, int, error) {
 
 func parseColor(s string) (color.Color, error) {
 	if s == "" {
-		return nil, errors.Wrap(errorMissing, "color is empty")
+		return nil, fmt.Errorf("color is empty: %w", errorMissing)
 	}
 
 	if v, ok := Colors[s]; ok {
@@ -49,7 +49,7 @@ func parseColor(s string) (color.Color, error) {
 	}
 
 	if !colorPattern.MatchString(s) {
-		return nil, errors.Wrapf(errorMalformed, "color '%s' is not valid", s)
+		return nil, fmt.Errorf("color '%s' is not valid: %w", s, errorMalformed)
 	}
 
 	var ss []string
@@ -62,22 +62,22 @@ func parseColor(s string) (color.Color, error) {
 	case 6:
 		ss = []string{s[0:2], s[2:4], s[4:6]}
 	default:
-		return nil, errors.Wrapf(errorUnexpected, "bad color '%s'", s)
+		return nil, fmt.Errorf("bad color '%s': %w", s, errorUnexpected)
 	}
 
 	red, err := strconv.ParseUint(ss[0], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad red '%s': %v", ss[0], err)
+		return nil, fmt.Errorf("bad red '%s': %v: %w", ss[0], err, errorUnexpected)
 	}
 
 	green, err := strconv.ParseUint(ss[1], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad green '%s': %v", ss[1], err)
+		return nil, fmt.Errorf("bad green '%s': %v: %w", ss[1], err, errorUnexpected)
 	}
 
 	blue, err := strconv.ParseUint(ss[2], 16, 8)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "bad blue '%s': %v", ss[2], err)
+		return nil, fmt.Errorf("bad blue '%s': %v: %w", ss[2], err, errorUnexpected)
 	}
 
 	return color.RGBA{
@@ -91,12 +91,12 @@ func parseColor(s string) (color.Color, error) {
 func loadFont(fn string) (*truetype.Font, error) {
 	bb, err := resources.Static.ReadFile(fn)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "failed to read file '%s': %v", fn, err)
+		return nil, fmt.Errorf("failed to read file '%s': %v: %w", fn, err, errorUnexpected)
 	}
 
 	fnt, err := truetype.Parse(bb)
 	if err != nil {
-		return nil, errors.Wrapf(errorUnexpected, "failed to parse font: %v", err)
+		return nil, fmt.Errorf("failed to parse font '%s': %v: %w", fn, err, errorUnexpected)
 	}
 
 	return fnt, nil

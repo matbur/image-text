@@ -1,11 +1,10 @@
 package image
 
 import (
+	"errors"
 	"image/color"
 	"reflect"
 	"testing"
-
-	"github.com/pkg/errors"
 )
 
 func Test_parseSize(t *testing.T) {
@@ -51,7 +50,7 @@ func Test_parseSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1, err := parseSize(tt.arg)
-			if errors.Cause(err) != tt.err {
+			if !errors.Is(err, tt.err) {
 				t.Errorf("parseSize() error = %v, err %v", err, tt.err)
 				return
 			}
@@ -121,7 +120,7 @@ func Test_parseColor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := parseColor(tt.arg)
-			if errors.Cause(err) != tt.err {
+			if !errors.Is(err, tt.err) {
 				t.Errorf("parseColor() error = %v, err %v", err, tt.err)
 				return
 			}

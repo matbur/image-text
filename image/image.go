@@ -1,22 +1,22 @@
 package image
 
 import (
-	stdErr "errors"
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
 	"regexp"
 
-	"github.com/pkg/errors"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
 
 var (
-	errorMissing    = stdErr.New("missing value")
-	errorMalformed  = stdErr.New("malformed value")
-	errorUnexpected = stdErr.New("unexpected error")
+	errorMissing    = errors.New("missing value")
+	errorMalformed  = errors.New("malformed value")
+	errorUnexpected = errors.New("unexpected error")
 
 	sizePattern  = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
 	colorPattern = regexp.MustCompile(`^(?:[0-9A-Fa-f]{3}){1,2}$`)
@@ -36,17 +36,17 @@ type Image struct {
 func New(size, background, foreground, text string) (*Image, error) {
 	width, height, err := parseSize(size)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse size")
+		return nil, fmt.Errorf("failed to parse size: %w", err)
 	}
 
 	bg, err := parseColor(background)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse background color")
+		return nil, fmt.Errorf("failed to parse background color: %w", err)
 	}
 
 	fg, err := parseColor(foreground)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse foreground color")
+		return nil, fmt.Errorf("failed to parse foreground color: %w", err)
 	}
 
 	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
@@ -71,9 +71,8 @@ func (img *Image) Draw(w io.Writer) error {
 	img.addLabel()
 
 	if err := png.Encode(w, img.Canvas); err != nil {
-		return errors.Wrap(err, "failed to encode png")
+		return fmt.Errorf("failed to encode png: %w", err)
 	}
-
 	return nil
 }
 
