@@ -15,7 +15,7 @@ import (
 )
 
 type config struct {
-	Addr string `envconfig:"ADDR" default:":8021"`
+	Port string `envconfig:"PORT" default:"8080"`
 	Mode string `envconfig:"MODE"`
 }
 
@@ -32,11 +32,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	addr := fmt.Sprintf(":%s", cfg.Port)
+
 	switch cfg.Mode {
 	case "TEST":
-		mode2(cfg.Addr)
+		mode2(addr)
 	default:
-		mode1(cfg.Addr)
+		mode1(addr)
 	}
 }
 
@@ -44,6 +46,7 @@ func mode1(addr string) {
 	slog.Info("Starting server", "addr", addr)
 
 	http.HandleFunc("/favicon.ico", server.HandleFavicon)
+	http.HandleFunc("/healthz", server.HandleHealthz)
 	http.HandleFunc("/", server.HandleMain())
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {

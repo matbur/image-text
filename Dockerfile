@@ -5,13 +5,11 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
-RUN go build -o app ./cmd/image-text
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o bin ./cmd/image-text
 
-FROM alpine:3.20
 
-USER nobody:nobody
+FROM scratch
 
-WORKDIR /app
-COPY --from=build-env app .
-CMD ["./app"]
+COPY --from=build-env /app/bin /server
+ENTRYPOINT ["/server"]

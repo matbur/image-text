@@ -94,3 +94,8 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to write docs", "err", err)
 	}
 }
+
+func HandleHealthz(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+	w.WriteHeader(http.StatusOK)
+}
