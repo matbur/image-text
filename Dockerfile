@@ -9,6 +9,9 @@ COPY . .
 RUN go build -o app ./cmd/image-text
 
 FROM alpine:3.20
+
+USER nobody:nobody
+
 WORKDIR /app
 COPY --from=build-env app .
 CMD ["./app"]
