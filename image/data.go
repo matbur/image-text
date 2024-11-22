@@ -150,24 +150,3 @@ var Colors = map[string]string{
 	"yellow":                  "FFFF00",
 	"yellow_green":            "9ACD32",
 }
-
-var Sizes = map[string]string{
-	// Screen Standards
-	"cga":   "320x200",
-	"qvga":  "320x240",
-	"vga":   "640x480",
-	"wvga":  "800x480",
-	"svga":  "800x480",
-	"wsvga": "1024x600",
-	"xga":   "1024x768",
-	"wxga":  "1280x800",
-	"wsxga": "1440x900",
-	"wuxga": "1920x1200",
-	"wqxga": "2560x1600",
-
-	// Video Standards
-	"ntsc":   "720x480",
-	"pal":    "768x576",
-	"hd720":  "1280x720",
-	"hd1080": "1920x1080",
-}

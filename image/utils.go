@@ -12,33 +12,6 @@ import (
 	"github.com/matbur/image-text/resources"
 )
 
-func parseSize(s string) (int, int, error) {
-	if s == "" {
-		return 0, 0, fmt.Errorf("size is empty: %w", errorMissing)
-	}
-
-	if s, ok := Sizes[s]; ok {
-		return parseSize(s)
-	}
-
-	ss := sizePattern.FindStringSubmatch(s)
-	if len(ss) != 3 {
-		return 0, 0, fmt.Errorf("size '%s' is not valid: %w", s, errorMalformed)
-	}
-
-	width, err := strconv.Atoi(ss[1])
-	if err != nil {
-		return 0, 0, fmt.Errorf("bad width '%s': %v: %w", ss[1], err, errorUnexpected)
-	}
-
-	height, err := strconv.Atoi(ss[2])
-	if err != nil {
-		return 0, 0, fmt.Errorf("bad height '%s': %v: %w", ss[2], err, errorUnexpected)
-	}
-
-	return width, height, nil
-}
-
 func parseColor(s string) (color.Color, error) {
 	if s == "" {
 		return nil, fmt.Errorf("color is empty: %w", errorMissing)

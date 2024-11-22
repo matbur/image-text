@@ -18,15 +18,13 @@ var (
 	errorMalformed  = errors.New("malformed value")
 	errorUnexpected = errors.New("unexpected error")
 
-	sizePattern  = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
 	colorPattern = regexp.MustCompile(`^(?:[0-9A-Fa-f]{3}){1,2}$`)
 
 	ubuntuMono = loadUbuntuMono()
 )
 
 type Image struct {
-	Width      int
-	Height     int
+	size       Size
 	Background color.Color
 	Foreground color.Color
 	Text       string
@@ -34,7 +32,7 @@ type Image struct {
 }
 
 func New(size, background, foreground, text string) (*Image, error) {
-	width, height, err := parseSize(size)
+	s, err := NewSizeFromString(size)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse size: %w", err)
 	}
@@ -49,15 +47,14 @@ func New(size, background, foreground, text string) (*Image, error) {
 		return nil, fmt.Errorf("failed to parse foreground color: %w", err)
 	}
 
-	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
+	rgba := image.NewRGBA(image.Rect(0, 0, s.Width(), s.Height()))
 
 	if text == "" {
 		text = size
 	}
 
 	return &Image{
-		Width:      width,
-		Height:     height,
+		size:       s,
 		Background: bg,
 		Foreground: fg,
 		Text:       text,
@@ -66,8 +63,8 @@ func New(size, background, foreground, text string) (*Image, error) {
 }
 
 func (img *Image) Draw(w io.Writer) error {
-	for y := 0; y < img.Height; y++ {
-		for x := 0; x < img.Width; x++ {
+	for y := 0; y < img.size.Height(); y++ {
+		for x := 0; x < img.size.Width(); x++ {
 			img.Canvas.Set(x, y, img.Background)
 		}
 	}
@@ -83,13 +80,13 @@ func (img *Image) Draw(w io.Writer) error {
 func (img *Image) addLabel() {
 	const scale = .95
 
-	height := int(scale * float64(minInt(img.Height, 2*img.Width/len(img.Text))))
+	height := int(scale * float64(minInt(img.size.Height(), 2*img.size.Width()/len(img.Text))))
 	face := loadFace(height)
 
 	width := font.MeasureString(face, img.Text).Round()
-	x := (img.Width - width) / 2
+	x := (img.size.Width() - width) / 2
 
-	y := img.Height/2 + height/4
+	y := img.size.Height()/2 + height/4
 
 	point := fixed.Point26_6{
 		X: fixed.Int26_6(x << 6),

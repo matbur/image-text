@@ -176,10 +176,15 @@ var docs = struct {
 		"with_codes": "/320x200/000/FFFF00",
 	},
 	Colors: image.Colors,
-	Sizes:  image.Sizes,
 }
 
 func handleDocs(w http.ResponseWriter, r *http.Request) {
+	sizes := map[string]string{}
+	for k, v := range image.KnownSizes() {
+		sizes[k] = v.String()
+	}
+	docs.Sizes = sizes
+
 	js, err := json.Marshal(docs)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)

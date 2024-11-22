@@ -7,63 +7,6 @@ import (
 	"testing"
 )
 
-func Test_parseSize(t *testing.T) {
-	tests := []struct {
-		name   string
-		arg    string
-		width  int
-		height int
-		err    error
-	}{
-		{
-			name: "empty size",
-			arg:  "",
-			err:  errorMissing,
-		}, {
-			name: "too many parts",
-			arg:  "234x23x243",
-			err:  errorMalformed,
-		}, {
-			name: "with float",
-			arg:  "200x300.243",
-			err:  errorMalformed,
-		}, {
-			name: "with 0",
-			arg:  "200x0",
-			err:  errorMalformed,
-		}, {
-			name: "with too big value",
-			arg:  "1x1000000",
-			err:  errorMalformed,
-		}, {
-			name:   "with big value",
-			arg:    "1x999999",
-			width:  1,
-			height: 999999,
-		}, {
-			name:   "valid size",
-			arg:    "200x300",
-			width:  200,
-			height: 300,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := parseSize(tt.arg)
-			if !errors.Is(err, tt.err) {
-				t.Errorf("parseSize() error = %v, err %v", err, tt.err)
-				return
-			}
-			if got != tt.width {
-				t.Errorf("parseSize() got = %v, width %v", got, tt.width)
-			}
-			if got1 != tt.height {
-				t.Errorf("parseSize() got1 = %v, height %v", got1, tt.height)
-			}
-		})
-	}
-}
-
 func Test_parseColor(t *testing.T) {
 	tests := []struct {
 		name string
