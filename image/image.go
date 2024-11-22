@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"image/color"
 	"image/png"
 	"io"
-	"regexp"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -18,17 +16,15 @@ var (
 	errorMalformed  = errors.New("malformed value")
 	errorUnexpected = errors.New("unexpected error")
 
-	colorPattern = regexp.MustCompile(`^(?:[0-9A-Fa-f]{3}){1,2}$`)
-
 	ubuntuMono = loadUbuntuMono()
 )
 
 type Image struct {
-	size       Size
-	Background color.Color
-	Foreground color.Color
-	Text       string
-	Canvas     *image.RGBA
+	size   Size
+	bg     Color
+	fg     Color
+	Text   string
+	Canvas *image.RGBA
 }
 
 func New(size, background, foreground, text string) (*Image, error) {
@@ -37,12 +33,12 @@ func New(size, background, foreground, text string) (*Image, error) {
 		return nil, fmt.Errorf("failed to parse size: %w", err)
 	}
 
-	bg, err := parseColor(background)
+	bg, err := NewBackgroundColorFromString(background)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse background color: %w", err)
 	}
 
-	fg, err := parseColor(foreground)
+	fg, err := NewForegroundColorFromString(foreground)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse foreground color: %w", err)
 	}
@@ -54,18 +50,18 @@ func New(size, background, foreground, text string) (*Image, error) {
 	}
 
 	return &Image{
-		size:       s,
-		Background: bg,
-		Foreground: fg,
-		Text:       text,
-		Canvas:     rgba,
+		size:   s,
+		bg:     bg,
+		fg:     fg,
+		Text:   text,
+		Canvas: rgba,
 	}, nil
 }
 
 func (img *Image) Draw(w io.Writer) error {
 	for y := 0; y < img.size.Height(); y++ {
 		for x := 0; x < img.size.Width(); x++ {
-			img.Canvas.Set(x, y, img.Background)
+			img.Canvas.Set(x, y, img.bg)
 		}
 	}
 
@@ -95,7 +91,7 @@ func (img *Image) addLabel() {
 
 	d := &font.Drawer{
 		Dst:  img.Canvas,
-		Src:  image.NewUniform(img.Foreground),
+		Src:  image.NewUniform(img.fg),
 		Dot:  point,
 		Face: face,
 	}

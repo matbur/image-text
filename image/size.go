@@ -6,27 +6,6 @@ import (
 	"strconv"
 )
 
-var knownSizes = map[string]Size{
-	// Screen Standards
-	"cga":   NewSize(320, 200),
-	"qvga":  NewSize(320, 240),
-	"vga":   NewSize(640, 480),
-	"wvga":  NewSize(800, 480),
-	"svga":  NewSize(800, 480),
-	"wsvga": NewSize(1024, 600),
-	"xga":   NewSize(1024, 768),
-	"wxga":  NewSize(1280, 800),
-	"wsxga": NewSize(1440, 900),
-	"wuxga": NewSize(1920, 1200),
-	"wqxga": NewSize(2560, 1600),
-
-	// Video Standards
-	"ntsc":   NewSize(720, 480),
-	"pal":    NewSize(768, 576),
-	"hd720":  NewSize(1280, 720),
-	"hd1080": NewSize(1920, 1080),
-}
-
 var sizePattern = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
 
 type Size struct {
@@ -41,8 +20,11 @@ func NewSize(width, height int) Size {
 }
 
 func NewSizeFromString(s string) (Size, error) {
-	size, ok := knownSizes[s]
-	if ok {
+	if s == "" {
+		return DefaultSize(), fmt.Errorf("size is empty: %w", errorMissing)
+	}
+
+	if size, ok := knownSizes[s]; ok {
 		return size, nil
 	}
 
@@ -82,4 +64,25 @@ func (s Size) String() string {
 
 func KnownSizes() map[string]Size {
 	return knownSizes
+}
+
+var knownSizes = map[string]Size{
+	// Screen Standards
+	"cga":   NewSize(320, 200),
+	"qvga":  NewSize(320, 240),
+	"vga":   NewSize(640, 480),
+	"wvga":  NewSize(800, 480),
+	"svga":  NewSize(800, 480),
+	"wsvga": NewSize(1024, 600),
+	"xga":   NewSize(1024, 768),
+	"wxga":  NewSize(1280, 800),
+	"wsxga": NewSize(1440, 900),
+	"wuxga": NewSize(1920, 1200),
+	"wqxga": NewSize(2560, 1600),
+
+	// Video Standards
+	"ntsc":   NewSize(720, 480),
+	"pal":    NewSize(768, 576),
+	"hd720":  NewSize(1280, 720),
+	"hd1080": NewSize(1920, 1080),
 }

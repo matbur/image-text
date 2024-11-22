@@ -2,64 +2,12 @@ package image
 
 import (
 	"fmt"
-	"image/color"
-	"strconv"
-	"strings"
 
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 
 	"github.com/matbur/image-text/resources"
 )
-
-func parseColor(s string) (color.Color, error) {
-	if s == "" {
-		return nil, fmt.Errorf("color is empty: %w", errorMissing)
-	}
-
-	if v, ok := Colors[s]; ok {
-		return parseColor(v)
-	}
-
-	if !colorPattern.MatchString(s) {
-		return nil, fmt.Errorf("color '%s' is not valid: %w", s, errorMalformed)
-	}
-
-	var ss []string
-	switch len(s) {
-	case 3:
-		ss = strings.Split(s, "")
-		ss[0] += ss[0]
-		ss[1] += ss[1]
-		ss[2] += ss[2]
-	case 6:
-		ss = []string{s[0:2], s[2:4], s[4:6]}
-	default:
-		return nil, fmt.Errorf("bad color '%s': %w", s, errorUnexpected)
-	}
-
-	red, err := strconv.ParseUint(ss[0], 16, 8)
-	if err != nil {
-		return nil, fmt.Errorf("bad red '%s': %v: %w", ss[0], err, errorUnexpected)
-	}
-
-	green, err := strconv.ParseUint(ss[1], 16, 8)
-	if err != nil {
-		return nil, fmt.Errorf("bad green '%s': %v: %w", ss[1], err, errorUnexpected)
-	}
-
-	blue, err := strconv.ParseUint(ss[2], 16, 8)
-	if err != nil {
-		return nil, fmt.Errorf("bad blue '%s': %v: %w", ss[2], err, errorUnexpected)
-	}
-
-	return color.RGBA{
-		R: uint8(red),
-		G: uint8(green),
-		B: uint8(blue),
-		A: 255,
-	}, nil
-}
 
 func loadFont(fn string) (*truetype.Font, error) {
 	bb, err := resources.Static.ReadFile(fn)

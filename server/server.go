@@ -175,7 +175,6 @@ var docs = struct {
 		"with_names": "/hd720/steel_blue/yellow?text=rendered+text",
 		"with_codes": "/320x200/000/FFFF00",
 	},
-	Colors: image.Colors,
 }
 
 func handleDocs(w http.ResponseWriter, r *http.Request) {
@@ -184,6 +183,12 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 		sizes[k] = v.String()
 	}
 	docs.Sizes = sizes
+
+	colors := map[string]string{}
+	for k, v := range image.KnownColors() {
+		colors[k] = v.String()
+	}
+	docs.Colors = colors
 
 	js, err := json.Marshal(docs)
 	if err != nil {
