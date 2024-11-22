@@ -11,3 +11,12 @@ logs:
 
 test:
 	go test ./...
+
+goimports:
+	goimports -w -local $(cat go.mod | grep "^module " | cut -d' ' -f 2) .
+
+templ:
+	templ generate
+
+build-local: templ goimports
+	go build -o ./tmp/main ./cmd/image-text 

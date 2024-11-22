@@ -1,20 +1,116 @@
 package server
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/a-h/templ"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/matbur/image-text/image"
 	"github.com/matbur/image-text/resources"
+	"github.com/matbur/image-text/templates"
 )
 
-func HandleMain() http.HandlerFunc {
-	return chain(
-		dumpReq,
-		checkMethod(http.MethodGet),
-	)(handle)
+func NewServer() chi.Router {
+	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Get("/", handleMain)
+	r.Post("/post", handlePost)
+	r.Get("/favicon.ico", handleFavicon)
+	r.Get("/docs", handleDocs)
+	r.Get("/*", handle)
+
+	return r
+}
+
+func handleMain(w http.ResponseWriter, r *http.Request) {
+	params := templates.IndexPageParams{
+		Text:    r.URL.Query().Get("text"),
+		BgColor: r.URL.Query().Get("bg_color"),
+		FgColor: r.URL.Query().Get("fg_color"),
+		Size:    r.URL.Query().Get("size"),
+	}
+
+	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
+	if err != nil {
+		slog.Error("Failed to create image", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	buf := bytes.Buffer{}
+	if err := img.Draw(&buf); err != nil {
+		slog.Error("Failed to draw image", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+}
+
+func handlePost(w http.ResponseWriter, r *http.Request) {
+	bb, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.Error("Failed to read body", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := r.Body.Close(); err != nil {
+		slog.Error("Failed to close body", "err", err)
+	}
+
+	var params templates.IndexPageParams
+	if err := json.Unmarshal(bb, &params); err != nil {
+		slog.Error("Failed to unmarshal body", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	slog.Debug("Request to post", "path", r.URL.Path, "body", string(bb))
+
+	q := url.Values{}
+	q.Set("text", params.Text)
+	q.Set("bg_color", params.BgColor)
+	q.Set("fg_color", params.FgColor)
+	q.Set("size", params.Size)
+
+	u := url.URL{
+		Path:     "/",
+		RawQuery: q.Encode(),
+	}
+
+	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
+	if err != nil {
+		slog.Error("Failed to create image", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	buf := bytes.Buffer{}
+	if err := img.Draw(&buf); err != nil {
+		slog.Error("Failed to draw image", "err", err)
+		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	w.Header().Set("HX-Push-Url", u.String())
+	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +151,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	).Info("Response")
 }
 
-func HandleFavicon(w http.ResponseWriter, r *http.Request) {
+func handleFavicon(w http.ResponseWriter, r *http.Request) {
 	bb, err := resources.Static.ReadFile("favicon.png")
 	if err != nil {
 		slog.Error("Failed to load favicon", "err", err)
@@ -64,6 +160,7 @@ func HandleFavicon(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, err := w.Write(bb); err != nil {
 		slog.Error("Failed to write favicon", "err", err)
+		return
 	}
 }
 
@@ -75,8 +172,8 @@ var docs = struct {
 }{
 	Path: "HOST/size/background/foreground?text=rendered+text",
 	Examples: map[string]string{
-		"with_names": "http://localhost:8021/hd720/steel_blue/yellow?text=rendered+text",
-		"with_codes": "http://localhost:8021/320x200/000/FFFF00",
+		"with_names": "/hd720/steel_blue/yellow?text=rendered+text",
+		"with_codes": "/320x200/000/FFFF00",
 	},
 	Colors: image.Colors,
 	Sizes:  image.Sizes,
@@ -93,9 +190,4 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(js); err != nil {
 		slog.Error("Failed to write docs", "err", err)
 	}
-}
-
-func HandleHealthz(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("OK"))
-	w.WriteHeader(http.StatusOK)
 }

@@ -45,10 +45,9 @@ func main() {
 func mode1(addr string) {
 	slog.Info("Starting server", "addr", addr)
 
-	http.HandleFunc("/favicon.ico", server.HandleFavicon)
-	http.HandleFunc("/healthz", server.HandleHealthz)
-	http.HandleFunc("/", server.HandleMain())
-	if err := http.ListenAndServe(addr, nil); err != nil {
+	srv := server.NewServer()
+
+	if err := http.ListenAndServe(addr, srv); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			slog.Info("Server closed")
 			return

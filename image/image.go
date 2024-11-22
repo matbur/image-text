@@ -51,6 +51,10 @@ func New(size, background, foreground, text string) (*Image, error) {
 
 	rgba := image.NewRGBA(image.Rect(0, 0, width, height))
 
+	if text == "" {
+		text = size
+	}
+
 	return &Image{
 		Width:      width,
 		Height:     height,
