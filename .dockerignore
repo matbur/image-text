@@ -1,7 +1,8 @@
 *
-!cmd
-!image
-!resources
-!server
+!cmd/
+!image/
+!resources/
+!server/
+!templates/
 !go.mod
 !go.sum

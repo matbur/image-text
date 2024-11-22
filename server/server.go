@@ -45,14 +45,14 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
 	if err != nil {
 		slog.Error("Failed to create image", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 		return
 	}
 
 	buf := bytes.Buffer{}
 	if err := img.Draw(&buf); err != nil {
 		slog.Error("Failed to draw image", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 		return
 	}
 
