@@ -39,10 +39,3 @@ func loadFace(size int) font.Face {
 
 	return truetype.NewFace(ubuntuMono, opts)
 }
-
-func minInt(a, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
-}
