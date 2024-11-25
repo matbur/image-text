@@ -5,15 +5,6 @@ import (
 	"strings"
 )
 
-func isIn(s string, ss []string) bool {
-	for _, i := range ss {
-		if s == i {
-			return true
-		}
-	}
-	return false
-}
-
 func parsePath(s string) (string, string, string, error) {
 	s = strings.Trim(s, "/")
 	ss := strings.Split(s, "/")

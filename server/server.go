@@ -1,8 +1,6 @@
 package server
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -15,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/matbur/image-text/image"
+	"github.com/matbur/image-text/pkg/sliceutils"
 	"github.com/matbur/image-text/resources"
 	"github.com/matbur/image-text/templates"
 )
@@ -35,29 +34,35 @@ func NewServer() chi.Router {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	text := q.Get("text")
+	bgColor := q.Get("bg_color")
+	fgColor := q.Get("fg_color")
+	size := q.Get("size")
+
+	if bgColor == "" || fgColor == "" || size == "" {
+		q := url.Values{}
+		q.Set("text", text)
+		q.Set("bg_color", sliceutils.Coalesce(bgColor, "steel_blue"))
+		q.Set("fg_color", sliceutils.Coalesce(fgColor, "yellow"))
+		q.Set("size", sliceutils.Coalesce(size, "vga"))
+
+		u := url.URL{RawQuery: q.Encode()}
+
+		http.Redirect(w, r, u.String(), http.StatusSeeOther)
+		return
+	}
+
+	u := &url.URL{RawQuery: q.Encode()}
+	u = u.JoinPath(size, bgColor, fgColor)
+
 	params := templates.IndexPageParams{
-		Text:    r.URL.Query().Get("text"),
-		BgColor: r.URL.Query().Get("bg_color"),
-		FgColor: r.URL.Query().Get("fg_color"),
-		Size:    r.URL.Query().Get("size"),
+		Text:    text,
+		BgColor: bgColor,
+		FgColor: fgColor,
+		Size:    size,
+		Image:   u.String(),
 	}
-
-	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
-	if err != nil {
-		slog.Error("Failed to create image", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	if err := img.Draw(&buf); err != nil {
-		slog.Error("Failed to draw image", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
-		return
-	}
-
-	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
-
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
 
@@ -81,44 +86,25 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
-	if err != nil {
-		slog.Error("Failed to create image", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	if err := img.Draw(&buf); err != nil {
-		slog.Error("Failed to draw image", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
-		return
-	}
-
-	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
-
 	q := url.Values{}
 	q.Set("text", params.Text)
 	q.Set("bg_color", params.BgColor)
 	q.Set("fg_color", params.FgColor)
 	q.Set("size", params.Size)
 
-	u := url.URL{
-		Path:     "/",
-		RawQuery: q.Encode(),
-	}
-
+	u := &url.URL{RawQuery: q.Encode()}
 	w.Header().Set("HX-Push-Url", u.String())
+	slog.Info("Pushing", "url", u.String())
+
+	u = u.JoinPath(params.Size, params.BgColor, params.FgColor)
+	slog.Info("Image ulr", "url", u.String())
+
+	params.Image = u.String()
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	begin := time.Now()
-
-	if r.URL.Path == "/" {
-		handleDocs(w, r)
-		return
-	}
 
 	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
