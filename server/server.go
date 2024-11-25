@@ -62,10 +62,12 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
+	var params templates.IndexPageParams
+
 	bb, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Failed to read body", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 		return
 	}
 
@@ -73,14 +75,27 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to close body", "err", err)
 	}
 
-	var params templates.IndexPageParams
 	if err := json.Unmarshal(bb, &params); err != nil {
 		slog.Error("Failed to unmarshal body", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 		return
 	}
 
-	slog.Debug("Request to post", "path", r.URL.Path, "body", string(bb))
+	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
+	if err != nil {
+		slog.Error("Failed to create image", "err", err)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+		return
+	}
+
+	buf := bytes.Buffer{}
+	if err := img.Draw(&buf); err != nil {
+		slog.Error("Failed to draw image", "err", err)
+		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+		return
+	}
+
+	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	q := url.Values{}
 	q.Set("text", params.Text)
@@ -92,22 +107,6 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		RawQuery: q.Encode(),
 	}
-
-	img, err := image.New(params.Size, params.BgColor, params.FgColor, params.Text)
-	if err != nil {
-		slog.Error("Failed to create image", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	if err := img.Draw(&buf); err != nil {
-		slog.Error("Failed to draw image", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	params.Image = "data:image/png;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	w.Header().Set("HX-Push-Url", u.String())
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)

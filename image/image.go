@@ -28,23 +28,12 @@ type Image struct {
 }
 
 func New(size, background, foreground, text string) (*Image, error) {
-	s, err := NewSizeFromString(size)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse size: %w", err)
-	}
-
-	bg, err := NewBackgroundColorFromString(background)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse background color: %w", err)
-	}
-
-	fg, err := NewForegroundColorFromString(foreground)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse foreground color: %w", err)
-	}
+	s, _ := NewSizeFromString(size)
+	bg, _ := NewBackgroundColorFromString(background)
+	fg, _ := NewForegroundColorFromString(foreground)
 
 	if text == "" {
-		text = size
+		text = s.String()
 	}
 
 	canvas := image.NewRGBA(image.Rect(0, 0, s.Width(), s.Height()))
@@ -76,7 +65,7 @@ func (img *Image) Draw(w io.Writer) error {
 func (img *Image) addLabel() {
 	const scale = .95
 
-	height := int(scale * float64(min(img.size.Height(), 2*img.size.Width()/len(img.text))))
+	height := int(scale * float64(min(img.size.Height(), 2*img.size.Width()/max(len(img.text), 1))))
 	face := loadFace(height)
 
 	width := font.MeasureString(face, img.text).Round()
@@ -97,3 +86,8 @@ func (img *Image) addLabel() {
 	}
 	d.DrawString(img.text)
 }
+
+func (img *Image) Text() string    { return img.text }
+func (img *Image) Size() string    { return img.size.String() }
+func (img *Image) BgColor() string { return img.bg.String() }
+func (img *Image) FgColor() string { return img.fg.String() }

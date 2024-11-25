@@ -90,11 +90,11 @@ func DefaultForegroundColor() Color {
 }
 
 func (c Color) RGBA() (r, g, b, a uint32) {
-	return uint32(c.r), uint32(c.g), uint32(c.b), 255
+	return uint32(c.r) << 8, uint32(c.g) << 8, uint32(c.b) << 8, 255 << 8
 }
 
 func (c Color) String() string {
-	return fmt.Sprintf("#%02x%02x%02x", c.r, c.g, c.b)
+	return fmt.Sprintf("%02x%02x%02x", c.r, c.g, c.b)
 }
 
 func KnownColors() map[string]Color {

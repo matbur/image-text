@@ -59,7 +59,10 @@ type IndexPageParams struct {
 templ IndexPage(params IndexPageParams) {
 	@layout() {
 		<div class="container mt-5">
-			<h1>image-text</h1>
+			<a href="/">
+				<h1>image-text</h1>
+			</a>
+			<a href="/docs" hx-boost="false">docs</a>
 			<form
 				id="dynamicForm"
 				method="post"
