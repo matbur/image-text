@@ -7,6 +7,7 @@ import (
 	"image/png"
 	"io"
 
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
@@ -28,9 +29,22 @@ type Image struct {
 }
 
 func New(size, background, foreground, text string) (*Image, error) {
-	s, _ := NewSizeFromString(size)
-	bg, _ := NewBackgroundColorFromString(background)
-	fg, _ := NewForegroundColorFromString(foreground)
+	var err error
+
+	s, err := NewSizeFromString(size)
+	if err != nil {
+		err = multierror.Append(err, fmt.Errorf("failed to create size: %w", err))
+	}
+
+	bg, err := NewBackgroundColorFromString(background)
+	if err != nil {
+		err = multierror.Append(err, fmt.Errorf("failed to create background color: %w", err))
+	}
+
+	fg, err := NewForegroundColorFromString(foreground)
+	if err != nil {
+		err = multierror.Append(err, fmt.Errorf("failed to create foreground color: %w", err))
+	}
 
 	if text == "" {
 		text = s.String()
@@ -44,17 +58,12 @@ func New(size, background, foreground, text string) (*Image, error) {
 		fg:     fg,
 		text:   text,
 		canvas: canvas,
-	}, nil
+	}, err
 }
 
 func (img *Image) Draw(w io.Writer) error {
-	for y := 0; y < img.size.Height(); y++ {
-		for x := 0; x < img.size.Width(); x++ {
-			img.canvas.Set(x, y, img.bg)
-		}
-	}
-
-	img.addLabel()
+	img.drawBackground()
+	img.drawLabel()
 
 	if err := png.Encode(w, img.canvas); err != nil {
 		return fmt.Errorf("failed to encode png: %w", err)
@@ -62,7 +71,15 @@ func (img *Image) Draw(w io.Writer) error {
 	return nil
 }
 
-func (img *Image) addLabel() {
+func (img *Image) drawBackground() {
+	for y := 0; y < img.size.Height(); y++ {
+		for x := 0; x < img.size.Width(); x++ {
+			img.canvas.Set(x, y, img.bg)
+		}
+	}
+}
+
+func (img *Image) drawLabel() {
 	const scale = .95
 
 	height := int(scale * float64(min(img.size.Height(), 2*img.size.Width()/max(len(img.text), 1))))

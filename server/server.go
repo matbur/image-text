@@ -28,7 +28,7 @@ func NewServer() chi.Router {
 	r.Post("/post", handlePost)
 	r.Get("/favicon.ico", handleFavicon)
 	r.Get("/docs", handleDocs)
-	r.Get("/*", handle)
+	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
 
 	return r
 }
@@ -103,23 +103,17 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
 
-func handle(w http.ResponseWriter, r *http.Request) {
+func handleImage(w http.ResponseWriter, r *http.Request) {
 	begin := time.Now()
+
+	size := chi.URLParam(r, "size")
+	bgColor := chi.URLParam(r, "bg_color")
+	fgColor := chi.URLParam(r, "fg_color")
+	text := r.URL.Query().Get("text")
 
 	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
-	size, bg, fg, err := parsePath(r.URL.Path)
-	if err != nil {
-		writeJSON(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	text := r.URL.Query().Get("text")
-	if text == "" {
-		text = size
-	}
-
-	img, err := image.New(size, bg, fg, text)
+	img, err := image.New(size, bgColor, fgColor, text)
 	if err != nil {
 		writeJSON(w, err.Error(), http.StatusBadRequest)
 		return
