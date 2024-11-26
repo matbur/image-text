@@ -1,14 +1,15 @@
-package image_test
+package server_test
 
 import (
 	"bytes"
+	"fmt"
+	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/matbur/image-text/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/matbur/image-text/image"
 )
 
 func TestImage(t *testing.T) {
@@ -38,13 +39,16 @@ func TestImage(t *testing.T) {
 	for _, tt := range tests {
 		name := tt.size + "-" + tt.bgColor + "-" + tt.fgColor + "-" + tt.text + ".png"
 		t.Run(name, func(t *testing.T) {
-			img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text)
-			require.NoError(t, err)
+
+			u := fmt.Sprintf("/%s/%s/%s?text=%s", tt.size, tt.bgColor, tt.fgColor, tt.text)
+			r := httptest.NewRequest("GET", u, nil)
+
+			rr := httptest.NewRecorder()
+			server.NewServer().ServeHTTP(rr, r)
 
 			var buf bytes.Buffer
-			err = img.Draw(&buf)
+			_, err := buf.ReadFrom(rr.Result().Body)
 			require.NoError(t, err)
-			require.NotEmpty(t, buf.Bytes())
 
 			bb, err := os.ReadFile("../fixtures/" + name)
 			require.NoError(t, err)

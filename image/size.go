@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var sizePattern = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
@@ -23,6 +24,8 @@ func NewSizeFromString(s string) (Size, error) {
 	if s == "" {
 		return DefaultSize(), fmt.Errorf("size is empty: %w", errorMissing)
 	}
+
+	s = strings.ToLower(s)
 
 	if size, ok := knownSizes[s]; ok {
 		return size, nil

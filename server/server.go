@@ -53,7 +53,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := &url.URL{RawQuery: q.Encode()}
+	u := &url.URL{Path: "/", RawQuery: q.Encode()}
 	u = u.JoinPath(size, bgColor, fgColor)
 
 	params := templates.IndexPageParams{
@@ -92,12 +92,12 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	q.Set("fg_color", params.FgColor)
 	q.Set("size", params.Size)
 
-	u := &url.URL{RawQuery: q.Encode()}
+	u := &url.URL{Path: "/", RawQuery: q.Encode()}
 	w.Header().Set("HX-Push-Url", u.String())
 	slog.Info("Pushing", "url", u.String())
 
 	u = u.JoinPath(params.Size, params.BgColor, params.FgColor)
-	slog.Info("Image ulr", "url", u.String())
+	slog.Info("Image url", "url", u.String())
 
 	params.Image = u.String()
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)

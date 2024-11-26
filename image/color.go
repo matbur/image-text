@@ -42,6 +42,8 @@ func NewColorFromString(s string) (Color, error) {
 		return DefaultBackgroundColor(), fmt.Errorf("color is empty: %w", errorMissing)
 	}
 
+	s = strings.ToLower(s)
+
 	if color, ok := knownColors[s]; ok {
 		return color, nil
 	}
