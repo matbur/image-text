@@ -26,15 +26,26 @@ func NewServer() chi.Router {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/", handleMain)
-	r.Post("/post", handlePost)
+	r.Get("/online", handleOnline)
+	r.Post("/online/post", handlePost)
 	r.Get("/favicon.ico", handleFavicon)
 	r.Get("/docs", handleDocs)
+	r.Get("/resources/{filename}", handleStatic)
 	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
 
 	return r
 }
 
+func handleStatic(w http.ResponseWriter, r *http.Request) {
+	fn := r.PathValue("filename")
+	http.ServeFileFS(w, r, resources.Static, fn)
+}
+
 func handleMain(w http.ResponseWriter, r *http.Request) {
+	templ.Handler(templates.IndexPage(templates.IndexPageParams{})).ServeHTTP(w, r)
+}
+
+func handleOnline(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	text := q.Get("text")
 	bgColor := q.Get("bg_color")
@@ -48,7 +59,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 		q.Set("fg_color", sliceutils.Coalesce(fgColor, "yellow"))
 		q.Set("size", sliceutils.Coalesce(size, "vga"))
 
-		u := url.URL{RawQuery: q.Encode()}
+		u := url.URL{Path: "/online", RawQuery: q.Encode()}
 
 		http.Redirect(w, r, u.String(), http.StatusSeeOther)
 		return
@@ -57,7 +68,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 	u := &url.URL{Path: "/", RawQuery: q.Encode()}
 	u = u.JoinPath(size, bgColor, fgColor)
 
-	params := templates.IndexPageParams{
+	params := templates.DynamicPageParams{
 		Text:         text,
 		BgColor:      bgColor,
 		FgColor:      fgColor,
@@ -66,16 +77,16 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
 	}
-	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+	templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
 }
 
 func handlePost(w http.ResponseWriter, r *http.Request) {
-	var params templates.IndexPageParams
+	var params templates.DynamicPageParams
 
 	bb, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Failed to read body", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+		templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
 		return
 	}
 
@@ -85,7 +96,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.Unmarshal(bb, &params); err != nil {
 		slog.Error("Failed to unmarshal body", "err", err)
-		templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+		templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
 		return
 	}
 
@@ -105,7 +116,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	params.Image = u.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
-	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
+	templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
 }
 
 func handleImage(w http.ResponseWriter, r *http.Request) {

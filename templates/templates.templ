@@ -7,6 +7,14 @@ templ head() {
 		<title>image-text</title>
 		// <link rel="icon" href="static/logo.jpg"/>
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
+		<style>
+        html, body {
+            height: 100%;
+        }
+        .centered-container {
+            height: 100vh; /* Full viewport height */
+        }
+    </style>
 	</head>
 }
 
@@ -60,7 +68,36 @@ templ layout() {
 	</html>
 }
 
-type IndexPageParams struct {
+type IndexPageParams struct{}
+
+templ IndexPage(params IndexPageParams) {
+	@layout() {
+		<div class="container centered-container d-flex justify-content-center align-items-center">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="card mb-4" style="width: 18rem;">
+						<img src="/resources/htmx.png" class="card-img-top"/>
+						<div class="card-body">
+							<p class="card-text">Every image generation will be done on a backend</p>
+							<a href="/online" class="btn btn-primary">Go with online</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="card mb-4" style="width: 18rem;">
+						<img src="/resources/wasm.png" class="card-img-top"/>
+						<div class="card-body">
+							<p class="card-text">Every image generation will be done on a browser</p>
+							<a href="/offline" class="btn btn-primary">Go with offline</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+type DynamicPageParams struct {
 	Text    string `json:"text"`
 	BgColor string `json:"bg_color"`
 	FgColor string `json:"fg_color"`
@@ -71,7 +108,7 @@ type IndexPageParams struct {
 	SizeOptions  []string `json:"-"`
 }
 
-templ IndexPage(params IndexPageParams) {
+templ DynamicPage(params DynamicPageParams) {
 	@layout() {
 		<div class="container mt-5">
 			<div class="row">
@@ -82,8 +119,8 @@ templ IndexPage(params IndexPageParams) {
 					<a href="/docs" hx-boost="false">docs</a>
 					<form
 						method="post"
-						action="/"
-						hx-post="/post"
+						action="/online"
+						hx-post="/online/post"
 						hx-target="body"
 					>
 						<div class="row mb-3">
