@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/elliotchance/pie/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -57,11 +58,13 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 	u = u.JoinPath(size, bgColor, fgColor)
 
 	params := templates.IndexPageParams{
-		Text:    text,
-		BgColor: bgColor,
-		FgColor: fgColor,
-		Size:    size,
-		Image:   u.String(),
+		Text:         text,
+		BgColor:      bgColor,
+		FgColor:      fgColor,
+		Size:         size,
+		Image:        u.String(),
+		ColorOptions: pie.Keys(image.KnownColors()),
+		SizeOptions:  pie.Keys(image.KnownSizes()),
 	}
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
@@ -100,6 +103,8 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	slog.Info("Image url", "url", u.String())
 
 	params.Image = u.String()
+	params.ColorOptions = pie.Keys(image.KnownColors())
+	params.SizeOptions = pie.Keys(image.KnownSizes())
 	templ.Handler(templates.IndexPage(params)).ServeHTTP(w, r)
 }
 
