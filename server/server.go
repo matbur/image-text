@@ -26,8 +26,9 @@ func NewServer() chi.Router {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/", handleMain)
-	r.Get("/online", handleOnline)
-	r.Post("/online/post", handlePost)
+	r.Get("/online", handleOnlinePage)
+	r.Post("/online/post", handleOnlinePost)
+	r.Get("/offline", handleOfflinePage)
 	r.Get("/favicon.ico", handleFavicon)
 	r.Get("/docs", handleDocs)
 	r.Get("/resources/{filename}", handleStatic)
@@ -45,7 +46,7 @@ func handleMain(w http.ResponseWriter, r *http.Request) {
 	templ.Handler(templates.IndexPage(templates.IndexPageParams{})).ServeHTTP(w, r)
 }
 
-func handleOnline(w http.ResponseWriter, r *http.Request) {
+func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	text := q.Get("text")
 	bgColor := q.Get("bg_color")
@@ -68,7 +69,7 @@ func handleOnline(w http.ResponseWriter, r *http.Request) {
 	u := &url.URL{Path: "/", RawQuery: q.Encode()}
 	u = u.JoinPath(size, bgColor, fgColor)
 
-	params := templates.DynamicPageParams{
+	params := templates.OnlinePageParams{
 		Text:         text,
 		BgColor:      bgColor,
 		FgColor:      fgColor,
@@ -77,16 +78,16 @@ func handleOnline(w http.ResponseWriter, r *http.Request) {
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
 	}
-	templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
+	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
 
-func handlePost(w http.ResponseWriter, r *http.Request) {
-	var params templates.DynamicPageParams
+func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
+	var params templates.OnlinePageParams
 
 	bb, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Failed to read body", "err", err)
-		templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
+		templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 		return
 	}
 
@@ -96,7 +97,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.Unmarshal(bb, &params); err != nil {
 		slog.Error("Failed to unmarshal body", "err", err)
-		templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
+		templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 		return
 	}
 
@@ -116,7 +117,7 @@ func handlePost(w http.ResponseWriter, r *http.Request) {
 	params.Image = u.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
-	templ.Handler(templates.DynamicPage(params)).ServeHTTP(w, r)
+	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
 
 func handleImage(w http.ResponseWriter, r *http.Request) {
@@ -195,4 +196,8 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(js); err != nil {
 		slog.Error("Failed to write docs", "err", err)
 	}
+}
+
+func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
+	templ.Handler(templates.OfflinePage(templates.OfflinePageParams{})).ServeHTTP(w, r)
 }

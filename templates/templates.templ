@@ -11,6 +11,7 @@ templ head() {
         html, body {
             height: 100%;
         }
+
         .centered-container {
             height: 100vh; /* Full viewport height */
         }
@@ -37,7 +38,6 @@ templ layout() {
 			hx-boost="true"
 			hx-ext="json-enc"
 		>
-			@githubCorner()
 			{ children... }
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
@@ -47,6 +47,7 @@ templ layout() {
 				// https://htmx.org/docs/#modifying_swapping_behavior_with_events
 				if(evt.detail.xhr.status === 404){
 					// alert the user when a 404 occurs (maybe use a nicer mechanism than alert())
+					console.error("Couldn't find: ", evt.detail.xhr)
 					alert("Error: Could Not Find Resource");
 				} else if(evt.detail.xhr.status === 422){
 					// allow 422 responses to swap as we are using this as a signal that
@@ -72,8 +73,13 @@ type IndexPageParams struct{}
 
 templ IndexPage(params IndexPageParams) {
 	@layout() {
+		@githubCorner()
 		<div class="container centered-container d-flex justify-content-center align-items-center">
 			<div class="row">
+				<a href="/">
+					<h1>image-text</h1>
+				</a>
+				<a href="/docs" hx-boost="false">docs</a>
 				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
 						<img src="/resources/htmx.png" class="card-img-top"/>
@@ -97,7 +103,7 @@ templ IndexPage(params IndexPageParams) {
 	}
 }
 
-type DynamicPageParams struct {
+type OnlinePageParams struct {
 	Text    string `json:"text"`
 	BgColor string `json:"bg_color"`
 	FgColor string `json:"fg_color"`
@@ -108,7 +114,7 @@ type DynamicPageParams struct {
 	SizeOptions  []string `json:"-"`
 }
 
-templ DynamicPage(params DynamicPageParams) {
+templ OnlinePage(params OnlinePageParams) {
 	@layout() {
 		<div class="container mt-5">
 			<div class="row">
@@ -191,6 +197,102 @@ templ DynamicPage(params DynamicPageParams) {
 						</div>
 						<button type="submit" class="btn btn-primary">Submit</button>
 					</form>
+					<div class="mt-3">
+						if params.Image != "" {
+							<img src={ params.Image }/>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+type OfflinePageParams OnlinePageParams
+
+templ OfflinePage(params OfflinePageParams) {
+	@layout() {
+		<div class="container mt-5">
+			<div class="row">
+				<div class="col">
+					<a href="/">
+						<h1>image-text</h1>
+					</a>
+					<a href="/docs" hx-boost="false">docs</a>
+					// <form
+					// 	method="post"
+					// 	action="/online"
+					// 	hx-post="/online/post"
+					// 	hx-target="body"
+					// >
+					<div class="row mb-3">
+						<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+						<div class="col-sm-10">
+							<input
+								type="text"
+								class="form-control"
+								id="bg_color"
+								value={ params.BgColor }
+								name="bg_color"
+								list="bg_color_options"
+							/>
+							<datalist id="bg_color_options">
+								for _, c := range params.ColorOptions {
+									<option value={ c }></option>
+								}
+							</datalist>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+						<div class="col-sm-10">
+							<input
+								type="text"
+								class="form-control"
+								id="fg_color"
+								value={ params.FgColor }
+								name="fg_color"
+								list="fg_color_options"
+							/>
+							<datalist id="fg_color_options">
+								for _, c := range params.ColorOptions {
+									<option value={ c }></option>
+								}
+							</datalist>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<label for="size" class="col-sm-2 col-form-label">Size</label>
+						<div class="col-sm-10">
+							<input
+								type="size"
+								class="form-control"
+								id="size"
+								value={ params.Size }
+								name="size"
+								list="size_options"
+							/>
+							<datalist id="size_options">
+								for _, c := range params.SizeOptions {
+									<option value={ c }></option>
+								}
+							</datalist>
+						</div>
+					</div>
+					<div class="row mb-3">
+						<label for="text" class="col-sm-2 col-form-label">Text</label>
+						<div class="col-sm-10">
+							<input
+								type="text"
+								class="form-control"
+								id="text"
+								value={ params.Text }
+								name="text"
+							/>
+						</div>
+					</div>
+					<button type="submit" class="btn btn-primary">Submit</button>
+					// </form>
 					<div class="mt-3">
 						if params.Image != "" {
 							<img src={ params.Image }/>
