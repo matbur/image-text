@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cmp"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -14,7 +15,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/matbur/image-text/image"
-	"github.com/matbur/image-text/pkg/sliceutils"
 	"github.com/matbur/image-text/resources"
 	"github.com/matbur/image-text/templates"
 )
@@ -56,9 +56,9 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 	if bgColor == "" || fgColor == "" || size == "" {
 		q := url.Values{}
 		q.Set("text", text)
-		q.Set("bg_color", sliceutils.Coalesce(bgColor, "steel_blue"))
-		q.Set("fg_color", sliceutils.Coalesce(fgColor, "yellow"))
-		q.Set("size", sliceutils.Coalesce(size, "vga"))
+		q.Set("bg_color", cmp.Or(bgColor, "steel_blue"))
+		q.Set("fg_color", cmp.Or(fgColor, "yellow"))
+		q.Set("size", cmp.Or(size, "vga"))
 
 		u := url.URL{Path: "/online", RawQuery: q.Encode()}
 
