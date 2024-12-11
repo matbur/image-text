@@ -5,66 +5,117 @@ templ head() {
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<title>image-text</title>
-		// <link rel="icon" href="static/logo.jpg"/>
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"/>
+		<link rel="icon" href="/resources/favicon.png"/>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+			crossorigin="anonymous"
+		/>
 		<style>
-        html, body {
-            height: 100%;
-        }
+		html,
+		body {
+			height: 100%;
+		}
 
-        .centered-container {
-            height: 100vh; /* Full viewport height */
-        }
-    </style>
+		.centered-container {
+			height: 100vh;
+			/* Full viewport height */
+		}
+	</style>
 	</head>
 }
 
 templ githubCorner() {
 	<a href="https://github.com/matbur/image-text" class="github-corner" aria-label="View source on GitHub">
-		<svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
+		<svg
+			width="80"
+			height="80"
+			viewBox="0 0 250 250"
+			style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;"
+			aria-hidden="true"
+		>
 			<path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-			<path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-			<path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path>
+			<path
+				d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+				fill="currentColor"
+				style="transform-origin: 130px 106px;"
+				class="octo-arm"
+			></path>
+			<path
+				d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+				fill="currentColor"
+				class="octo-body"
+			></path>
 		</svg>
 	</a>
-	<style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+	<style>
+	.github-corner:hover .octo-arm {
+		animation: octocat-wave 560ms ease-in-out
+	}
+
+	@keyframes octocat-wave {
+
+		0%,
+		100% {
+			transform: rotate(0)
+		}
+
+		20%,
+		60% {
+			transform: rotate(-25deg)
+		}
+
+		40%,
+		80% {
+			transform: rotate(10deg)
+		}
+	}
+
+	@media (max-width:500px) {
+		.github-corner:hover .octo-arm {
+			animation: none
+		}
+
+		.github-corner .octo-arm {
+			animation: octocat-wave 560ms ease-in-out
+		}
+	}
+</style>
 }
 
 templ layout() {
 	<!DOCTYPE html>
 	<html lang="en">
 		@head()
-		<body
-			hx-boost="true"
-			hx-ext="json-enc"
-		>
+		<body hx-boost="true" hx-ext="json-enc">
 			{ children... }
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
 			<script>
-			document.body.addEventListener('htmx:beforeSwap', function(evt) {
-				// https://htmx.org/docs/#modifying_swapping_behavior_with_events
-				if(evt.detail.xhr.status === 404){
-					// alert the user when a 404 occurs (maybe use a nicer mechanism than alert())
-					console.error("Couldn't find: ", evt.detail.xhr)
-					alert("Error: Could Not Find Resource");
-				} else if(evt.detail.xhr.status === 422){
-					// allow 422 responses to swap as we are using this as a signal that
-					// a form was submitted with bad data and want to rerender with the
-					// errors
-					//
-					// set isError to false to avoid error logging in console
-					evt.detail.shouldSwap = true;
-					evt.detail.isError = false;
-				} else if(evt.detail.xhr.status === 418){
-					// if the response code 418 (I'm a teapot) is returned, retarget the
-					// content of the response to the element with the id `teapot`
-					evt.detail.shouldSwap = true;
-					evt.detail.target = htmx.find("#teapot");
-				}
-			});
-			</script>
+		document.body.addEventListener('htmx:beforeSwap', function (evt) {
+			// https://htmx.org/docs/#modifying_swapping_behavior_with_events
+			if (evt.detail.xhr.status === 404) {
+				// alert the user when a 404 occurs (maybe use a nicer mechanism than alert())
+				console.error("Couldn't find: ", evt.detail.xhr)
+				alert("Error: Could Not Find Resource");
+			} else if (evt.detail.xhr.status === 422) {
+				// allow 422 responses to swap as we are using this as a signal that
+				// a form was submitted with bad data and want to rerender with the
+				// errors
+				//
+				// set isError to false to avoid error logging in console
+				evt.detail.shouldSwap = true;
+				evt.detail.isError = false;
+			} else if (evt.detail.xhr.status === 418) {
+				// if the response code 418 (I'm a teapot) is returned, retarget the
+				// content of the response to the element with the id `teapot`
+				evt.detail.shouldSwap = true;
+				evt.detail.target = htmx.find("#teapot");
+			}
+		});
+	</script>
 		</body>
 	</html>
 }
@@ -80,9 +131,11 @@ templ IndexPage(params IndexPageParams) {
 					<h1>image-text</h1>
 				</a>
 				<a href="/docs" hx-boost="false">docs</a>
-				<div class="col-md-6">
+				<div class="col-md-6" hx-boost="false">
 					<div class="card mb-4" style="width: 18rem;">
-						<img src="/resources/htmx.png" class="card-img-top"/>
+						<a href="/online">
+							<img src="/resources/htmx.png" class="card-img-top"/>
+						</a>
 						<div class="card-body">
 							<p class="card-text">Every image generation will be done on a backend</p>
 							<a href="/online" class="btn btn-primary">Go with online</a>
@@ -91,7 +144,9 @@ templ IndexPage(params IndexPageParams) {
 				</div>
 				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
-						<img src="/resources/wasm.png" class="card-img-top"/>
+						<a href="/offline">
+							<img src="/resources/wasm.png" class="card-img-top"/>
+						</a>
 						<div class="card-body">
 							<p class="card-text">Every image generation will be done on a browser</p>
 							<a href="/offline" class="btn btn-primary">Go with offline</a>
@@ -123,12 +178,7 @@ templ OnlinePage(params OnlinePageParams) {
 						<h1>image-text</h1>
 					</a>
 					<a href="/docs" hx-boost="false">docs</a>
-					<form
-						method="post"
-						action="/online"
-						hx-post="/online/post"
-						hx-target="body"
-					>
+					<form method="post" action="/online" hx-post="/online/post" hx-target="body">
 						<div class="row mb-3">
 							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
 							<div class="col-sm-10">
@@ -186,13 +236,7 @@ templ OnlinePage(params OnlinePageParams) {
 						<div class="row mb-3">
 							<label for="text" class="col-sm-2 col-form-label">Text</label>
 							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="text"
-									value={ params.Text }
-									name="text"
-								/>
+								<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
 							</div>
 						</div>
 						<button type="submit" class="btn btn-primary">Submit</button>
@@ -219,12 +263,6 @@ templ OfflinePage(params OfflinePageParams) {
 						<h1>image-text</h1>
 					</a>
 					<a href="/docs" hx-boost="false">docs</a>
-					// <form
-					// 	method="post"
-					// 	action="/online"
-					// 	hx-post="/online/post"
-					// 	hx-target="body"
-					// >
 					<div class="row mb-3">
 						<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
 						<div class="col-sm-10">
@@ -232,9 +270,10 @@ templ OfflinePage(params OfflinePageParams) {
 								type="text"
 								class="form-control"
 								id="bg_color"
-								value={ params.BgColor }
+								value="steel_blue"
 								name="bg_color"
 								list="bg_color_options"
+								onchange="callGoFunction()"
 							/>
 							<datalist id="bg_color_options">
 								for _, c := range params.ColorOptions {
@@ -250,9 +289,10 @@ templ OfflinePage(params OfflinePageParams) {
 								type="text"
 								class="form-control"
 								id="fg_color"
-								value={ params.FgColor }
+								value="yellow"
 								name="fg_color"
 								list="fg_color_options"
+								onchange="callGoFunction()"
 							/>
 							<datalist id="fg_color_options">
 								for _, c := range params.ColorOptions {
@@ -268,9 +308,10 @@ templ OfflinePage(params OfflinePageParams) {
 								type="size"
 								class="form-control"
 								id="size"
-								value={ params.Size }
+								value="vga"
 								name="size"
 								list="size_options"
+								onchange="callGoFunction()"
 							/>
 							<datalist id="size_options">
 								for _, c := range params.SizeOptions {
@@ -288,18 +329,77 @@ templ OfflinePage(params OfflinePageParams) {
 								id="text"
 								value={ params.Text }
 								name="text"
+								onchange="callGoFunction()"
 							/>
 						</div>
 					</div>
 					<button type="submit" class="btn btn-primary">Submit</button>
-					// </form>
 					<div class="mt-3">
 						if params.Image != "" {
 							<img src={ params.Image }/>
 						}
 					</div>
+					<div id="img-placeholder"></div>
 				</div>
 			</div>
 		</div>
+		<script src="/resources/wasm_exec.js"></script>
+		<script>
+	// This is a polyfill for FireFox and Safari
+	if (!WebAssembly.instantiateStreaming) {
+		WebAssembly.instantiateStreaming = async (resp, importObject) => {
+			const source = await (await resp).arrayBuffer()
+			return await WebAssembly.instantiate(source, importObject)
+		}
+	}
+
+	// Promise to load the wasm file
+	function loadWasm(path) {
+		const go = new Go()
+
+		return new Promise((resolve, reject) => {
+			WebAssembly.instantiateStreaming(fetch(path), go.importObject)
+				.then(result => {
+					go.run(result.instance)
+					resolve(result.instance)
+				})
+				.catch(error => {
+					reject(error)
+				})
+		})
+	}
+
+	// Load the wasm file
+	loadWasm("/resources/main.wasm").then(wasm => {
+		console.log("main.wasm is loaded 👋")
+	}).catch(error => {
+		console.log("ouch", error)
+	})
+
+	const getValue = (id) => document.getElementById(id).value;
+
+	const getValues = () => ({
+		bgColor: getValue("bg_color"),
+		fgColor: getValue("fg_color"),
+		size: getValue("size"),
+		text: getValue("text"),
+	})
+
+	function callGoFunction() {
+		const values = getValues();
+
+		console.log('values', values);
+
+		const imagePlaceholder = document.getElementById("img-placeholder");
+		const { imageBase64, err } = imageText(values);
+		if (err) {
+			imagePlaceholder.innerHTML = "err: " + err;
+		} else {
+			const img = document.createElement("img")
+			img.setAttribute("src", "data:image/png;base64," + imageBase64)
+			imagePlaceholder.replaceChildren(img)
+		}
+	}
+</script>
 	}
 }

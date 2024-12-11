@@ -17,6 +17,7 @@ import (
 	"github.com/matbur/image-text/image"
 	"github.com/matbur/image-text/resources"
 	"github.com/matbur/image-text/templates"
+	"github.com/matbur/image-text/wasm"
 )
 
 func NewServer() chi.Router {
@@ -39,6 +40,11 @@ func NewServer() chi.Router {
 
 func handleStatic(w http.ResponseWriter, r *http.Request) {
 	fn := r.PathValue("filename")
+	if fn == "main.wasm" {
+		slog.Info("main.wasm")
+		w.Write(wasm.Main)
+		return
+	}
 	http.ServeFileFS(w, r, resources.Static, fn)
 }
 
@@ -199,5 +205,9 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
-	templ.Handler(templates.OfflinePage(templates.OfflinePageParams{})).ServeHTTP(w, r)
+	params := templates.OfflinePageParams{
+		ColorOptions: pie.Keys(image.KnownColors()),
+		SizeOptions:  pie.Keys(image.KnownSizes()),
+	}
+	templ.Handler(templates.OfflinePage(params)).ServeHTTP(w, r)
 }
