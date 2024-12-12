@@ -126,12 +126,12 @@ templ IndexPage(params IndexPageParams) {
 	@layout() {
 		@githubCorner()
 		<div class="container centered-container d-flex justify-content-center align-items-center">
-			<div class="row">
+			<div class="row" hx-boost="false">
 				<a href="/">
 					<h1>image-text</h1>
 				</a>
 				<a href="/docs" hx-boost="false">docs</a>
-				<div class="col-md-6" hx-boost="false">
+				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
 						<a href="/online">
 							<img src="/resources/htmx.png" class="card-img-top"/>
