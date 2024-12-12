@@ -240,11 +240,7 @@ templ OnlinePage(params OnlinePageParams) {
 						</div>
 						<button type="submit" class="btn btn-primary">Submit</button>
 					</form>
-					<div class="mt-3">
-						if params.Image != "" {
-							<img src={ params.Image }/>
-						}
-					</div>
+					@img(params.Image)
 				</div>
 			</div>
 		</div>
@@ -332,7 +328,7 @@ templ OfflinePage(params OfflinePageParams) {
 						</div>
 					</div>
 					<button type="submit" class="btn btn-primary" disabled>Submit</button>
-					<div id="img-placeholder" class="mt-3"></div>
+					@img("")
 				</div>
 			</div>
 		</div>
@@ -381,19 +377,22 @@ templ OfflinePage(params OfflinePageParams) {
 
 	function callGoFunction() {
 		const values = getValues();
-
 		console.log('values', values);
 
-		const imagePlaceholder = document.getElementById("img-placeholder");
+		const img = document.getElementById("img");
 		const { imageBase64, err } = imageText(values);
 		if (err) {
-			imagePlaceholder.innerHTML = "err: " + err;
+			console.error(err)
 		} else {
-			const img = document.createElement("img")
-			img.setAttribute("src", "data:image/png;base64," + imageBase64)
-			imagePlaceholder.replaceChildren(img)
+			img.setAttribute("src", "data:image/png;base64," + imageBase64);
 		}
 	}
 </script>
 	}
+}
+
+templ img(src string) {
+	<div class="mt-3">
+		<img id="img" src={ src } style="max-width:100%;"/>
+	</div>
 }
