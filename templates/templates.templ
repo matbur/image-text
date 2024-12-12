@@ -130,7 +130,7 @@ templ IndexPage(params IndexPageParams) {
 				<a href="/">
 					<h1>image-text</h1>
 				</a>
-				<a href="/docs" hx-boost="false">docs</a>
+				<a href="/docs">docs</a>
 				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
 						<a href="/online">
@@ -177,7 +177,6 @@ templ OnlinePage(params OnlinePageParams) {
 					<a href="/">
 						<h1>image-text</h1>
 					</a>
-					<a href="/docs" hx-boost="false">docs</a>
 					<form method="post" action="/online" hx-post="/online/post" hx-target="body">
 						<div class="row mb-3">
 							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
@@ -262,7 +261,6 @@ templ OfflinePage(params OfflinePageParams) {
 					<a href="/">
 						<h1>image-text</h1>
 					</a>
-					<a href="/docs" hx-boost="false">docs</a>
 					<div class="row mb-3">
 						<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
 						<div class="col-sm-10">
@@ -333,13 +331,8 @@ templ OfflinePage(params OfflinePageParams) {
 							/>
 						</div>
 					</div>
-					<button type="submit" class="btn btn-primary">Submit</button>
-					<div class="mt-3">
-						if params.Image != "" {
-							<img src={ params.Image }/>
-						}
-					</div>
-					<div id="img-placeholder"></div>
+					<button type="submit" class="btn btn-primary" disabled>Submit</button>
+					<div id="img-placeholder" class="mt-3"></div>
 				</div>
 			</div>
 		</div>
@@ -372,6 +365,7 @@ templ OfflinePage(params OfflinePageParams) {
 	// Load the wasm file
 	loadWasm("/resources/main.wasm").then(wasm => {
 		console.log("main.wasm is loaded 👋")
+		callGoFunction()
 	}).catch(error => {
 		console.log("ouch", error)
 	})

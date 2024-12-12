@@ -113,14 +113,15 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	q.Set("fg_color", params.FgColor)
 	q.Set("size", params.Size)
 
-	u := &url.URL{Path: "/", RawQuery: q.Encode()}
+	u := &url.URL{Path: "/online", RawQuery: q.Encode()}
 	w.Header().Set("HX-Push-Url", u.String())
 	slog.Info("Pushing", "url", u.String())
 
-	u = u.JoinPath(params.Size, params.BgColor, params.FgColor)
-	slog.Info("Image url", "url", u.String())
+	u2 := &url.URL{RawQuery: url.Values{"text": {params.Text}}.Encode()}
+	u2 = u2.JoinPath(params.Size, params.BgColor, params.FgColor)
+	slog.Info("Image url", "url", u2.String())
 
-	params.Image = u.String()
+	params.Image = u2.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)

@@ -18,10 +18,6 @@ func imageText(this js.Value, p []js.Value) any {
 	size := p[0].Get("size").String()
 	text := p[0].Get("text").String()
 
-	slog.Info("imageText",
-		"stringify", js.Global().Get("JSON").Call("stringify", p[0]),
-	)
-
 	img, err := image.New(size, bgColor, fgColor, text)
 	if err != nil {
 		slog.Error("Failed to create image", "err", err)
