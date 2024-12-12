@@ -39,6 +39,8 @@ func NewServer() chi.Router {
 }
 
 func handleStatic(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Expires", time.Now().Add(24*time.Hour).Format(http.TimeFormat))
+
 	fn := r.PathValue("filename")
 	if fn == "main.wasm" {
 		slog.Info("main.wasm")
