@@ -24,7 +24,7 @@ func loadFont(fn string) (*truetype.Font, error) {
 }
 
 func loadUbuntuMono() *truetype.Font {
-	fc, err := loadFont("UbuntuMono-Regular.ttf")
+	fc, err := loadFont("fonts/UbuntuMono-Regular.ttf")
 	if err != nil {
 		panic(err)
 	}

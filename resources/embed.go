@@ -2,5 +2,5 @@ package resources
 
 import "embed"
 
-//go:embed *
+//go:embed * fonts/*
 var Static embed.FS
