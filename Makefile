@@ -30,7 +30,7 @@ templ:
 	templ fmt .
 	templ generate
 
-build-local: templ goimports build-wasm
+build-local: goimports templ build-wasm
 	go build -o ./tmp/main ./cmd/image-text 
 
 build-wasm:
