@@ -219,6 +219,12 @@ type OnlinePageParams struct {
 	FontOptions  []string `json:"-"`
 }
 
+templ pageTitle(label string) {
+	<a href="/">
+		<h1>image-text <span class="badge bg-secondary ms-2 align-middle fs-6 fw-normal">{ label }</span></h1>
+	</a>
+}
+
 templ fontOptions(selected string, options []string) {
 	for _, option := range options {
 		if option == selected {
@@ -234,9 +240,7 @@ templ OnlinePage(params OnlinePageParams) {
 		<div class="container mt-5">
 			<div class="row">
 				<div class="col">
-					<a href="/">
-						<h1>image-text</h1>
-					</a>
+					@pageTitle("online")
 					<form method="post" action="/online" hx-post="/online/post" hx-target="#image-result">
 						<div class="row mb-3">
 							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
@@ -322,9 +326,7 @@ templ OfflinePage(params OfflinePageParams) {
 		<div class="container mt-5">
 			<div class="row">
 				<div class="col">
-					<a href="/">
-						<h1>image-text</h1>
-					</a>
+					@pageTitle("offline")
 					<form onsubmit="callGoFunction(); return false;">
 						<div class="row mb-3">
 							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
