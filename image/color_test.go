@@ -9,13 +9,12 @@ import (
 	"github.com/matbur/image-text/image"
 )
 
-func Test_parseColor(t *testing.T) {
+func TestNewColorFromString(t *testing.T) {
 	tests := []struct {
-		name       string
-		arg        string
-		r, g, b, a uint8
-		color      image.Color
-		err        bool
+		name  string
+		arg   string
+		color image.Color
+		err   bool
 	}{
 		{
 			name:  "empty color",
@@ -40,6 +39,11 @@ func Test_parseColor(t *testing.T) {
 			arg:   "12x",
 			color: image.DefaultBackgroundColor(),
 			err:   true,
+		},
+		{
+			name:  "named color",
+			arg:   "steel_blue",
+			color: image.NewColor(70, 130, 180),
 		},
 		{
 			name:  "valid 3 char color",
@@ -79,12 +83,6 @@ func Test_parseColor(t *testing.T) {
 			assert.Equal(t, tt.color, color)
 		})
 	}
-}
-
-func TestNamedColor(t *testing.T) {
-	color, err := image.NewColorFromString("steel_blue")
-	require.NoError(t, err)
-	assert.Equal(t, image.NewColor(70, 130, 180), color)
 }
 
 func TestKnownColorStrings(t *testing.T) {

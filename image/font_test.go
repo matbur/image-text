@@ -18,20 +18,26 @@ func TestKnownFonts(t *testing.T) {
 }
 
 func TestNewFontFromString(t *testing.T) {
-	fnt, err := image.NewFontFromString("roboto")
-	require.NoError(t, err)
-	require.NotNil(t, fnt)
+	t.Run("known font", func(t *testing.T) {
+		fnt, err := image.NewFontFromString("roboto")
+		require.NoError(t, err)
+		require.NotNil(t, fnt)
+	})
 
-	_, err = image.NewFontFromString("not_a_font")
-	require.Error(t, err)
-}
+	t.Run("default font", func(t *testing.T) {
+		fnt, err := image.NewFontFromString("")
+		require.NoError(t, err)
+		require.NotNil(t, fnt)
+	})
 
-func TestNewFontFromStringDefault(t *testing.T) {
-	fnt, err := image.NewFontFromString("")
-	require.NoError(t, err)
-	require.NotNil(t, fnt)
+	t.Run("case insensitive", func(t *testing.T) {
+		fnt, err := image.NewFontFromString("UBUNTU_MONO")
+		require.NoError(t, err)
+		require.NotNil(t, fnt)
+	})
 
-	fnt, err = image.NewFontFromString("UBUNTU_MONO")
-	require.NoError(t, err)
-	require.NotNil(t, fnt)
+	t.Run("unknown font", func(t *testing.T) {
+		_, err := image.NewFontFromString("not_a_font")
+		require.Error(t, err)
+	})
 }

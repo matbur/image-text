@@ -3,6 +3,7 @@ package image_test
 import (
 	"bytes"
 	"image/png"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,4 +22,12 @@ func assertValidPNG(t *testing.T, data []byte, width, height int) {
 	bounds := img.Bounds()
 	assert.Equal(t, width, bounds.Dx())
 	assert.Equal(t, height, bounds.Dy())
+}
+
+func assertMatchesFixture(t *testing.T, name string, got []byte) {
+	t.Helper()
+
+	want, err := os.ReadFile("../fixtures/" + name)
+	require.NoError(t, err, "missing fixture %s", name)
+	assert.Equal(t, want, got)
 }

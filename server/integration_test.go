@@ -14,6 +14,35 @@ import (
 	"github.com/matbur/image-text/server"
 )
 
+type onlinePostBody struct {
+	Text    string `json:"text"`
+	BgColor string `json:"bg_color"`
+	FgColor string `json:"fg_color"`
+	Size    string `json:"size"`
+	Font    string `json:"font"`
+}
+
+func newOnlinePostRequest(t *testing.T, htmx bool) *http.Request {
+	t.Helper()
+
+	body, err := json.Marshal(onlinePostBody{
+		Text:    "hello",
+		BgColor: "steel_blue",
+		FgColor: "yellow",
+		Size:    "vga",
+		Font:    "ubuntu_mono",
+	})
+	require.NoError(t, err)
+
+	req := httptest.NewRequest(http.MethodPost, "/online/post", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	if htmx {
+		req.Header.Set("HX-Request", "true")
+	}
+
+	return req
+}
+
 func TestIntegrationIndexPage(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -65,13 +94,8 @@ func TestIntegrationOnlinePageWithParams(t *testing.T) {
 }
 
 func TestIntegrationOnlinePost(t *testing.T) {
-	body := bytes.NewBufferString(`{"text":"hello","bg_color":"steel_blue","fg_color":"yellow","size":"vga","font":"ubuntu_mono"}`)
-
 	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/online/post", body)
-	req.Header.Set("Content-Type", "application/json")
-
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer().ServeHTTP(rr, newOnlinePostRequest(t, false))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Contains(t, rr.Header().Get("HX-Push-Url"), "/online?")
@@ -79,14 +103,8 @@ func TestIntegrationOnlinePost(t *testing.T) {
 }
 
 func TestIntegrationOnlinePostHTMXPartial(t *testing.T) {
-	body := bytes.NewBufferString(`{"text":"hello","bg_color":"steel_blue","fg_color":"yellow","size":"vga","font":"ubuntu_mono"}`)
-
 	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPost, "/online/post", body)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("HX-Request", "true")
-
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer().ServeHTTP(rr, newOnlinePostRequest(t, true))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	response := rr.Body.String()
@@ -110,25 +128,33 @@ func TestIntegrationImageBadRequest(t *testing.T) {
 	assert.Contains(t, payload.Error, "font")
 }
 
-func TestIntegrationImageHeaders(t *testing.T) {
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/vga/steel_blue/yellow?text=hello", nil)
+func TestIntegrationImage(t *testing.T) {
+	tests := []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "default",
+			url:  "/vga/steel_blue/yellow?text=hello",
+		},
+		{
+			name: "with font",
+			url:  "/vga/steel_blue/yellow?text=hello&font=open_sans",
+		},
+	}
 
-	server.NewServer().ServeHTTP(rr, req)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rr := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
-	assert.Equal(t, `inline; filename="image.png"`, rr.Header().Get("Content-Disposition"))
-	assertPNGSignature(t, rr.Body.Bytes())
-}
+			server.NewServer().ServeHTTP(rr, req)
 
-func TestIntegrationImageWithFont(t *testing.T) {
-	rr := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/vga/steel_blue/yellow?text=hello&font=open_sans", nil)
-
-	server.NewServer().ServeHTTP(rr, req)
-
-	assert.Equal(t, http.StatusOK, rr.Code)
-	assertPNGSignature(t, rr.Body.Bytes())
+			assert.Equal(t, http.StatusOK, rr.Code)
+			assert.Equal(t, `inline; filename="image.png"`, rr.Header().Get("Content-Disposition"))
+			assertPNGSignature(t, rr.Body.Bytes())
+		})
+	}
 }
 
 func TestIntegrationDocsJSON(t *testing.T) {

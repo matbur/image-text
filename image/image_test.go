@@ -2,7 +2,6 @@ package image_test
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,48 +10,55 @@ import (
 	"github.com/matbur/image-text/image"
 )
 
-func TestImage(t *testing.T) {
+func fixtureName(size, bgColor, fgColor, text string) string {
+	return size + "-" + bgColor + "-" + fgColor + "-" + text + ".png"
+}
+
+func TestDraw(t *testing.T) {
 	tests := []struct {
-		size, bgColor, fgColor, text string
+		size    string
+		bgColor string
+		fgColor string
+		text    string
+		width   int
+		height  int
 	}{
 		{
 			size:    "vga",
 			bgColor: "steel_blue",
 			fgColor: "yellow",
 			text:    "text",
+			width:   640,
+			height:  480,
 		},
 		{
 			size:    "hd720",
 			bgColor: "1c6",
 			fgColor: "53f",
 			text:    "",
+			width:   1280,
+			height:  720,
 		},
 		{
 			size:    "700x300",
 			bgColor: "278921",
 			fgColor: "53f943",
 			text:    "qwertyuiop",
+			width:   700,
+			height:  300,
 		},
 	}
 
 	for _, tt := range tests {
-		name := tt.size + "-" + tt.bgColor + "-" + tt.fgColor + "-" + tt.text + ".png"
+		name := fixtureName(tt.size, tt.bgColor, tt.fgColor, tt.text)
 		t.Run(name, func(t *testing.T) {
 			img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text, "")
 			require.NoError(t, err)
 
 			var buf bytes.Buffer
-			err = img.Draw(&buf)
-			require.NoError(t, err)
-			require.NotEmpty(t, buf.Bytes())
-
-			bb, err := os.ReadFile("../fixtures/" + name)
-			require.NoError(t, err)
-
-			if !assert.Equal(t, bb, buf.Bytes()) {
-				err := os.WriteFile(name, buf.Bytes(), 0644)
-				require.NoError(t, err)
-			}
+			require.NoError(t, img.Draw(&buf))
+			assertValidPNG(t, buf.Bytes(), tt.width, tt.height)
+			assertMatchesFixture(t, name, buf.Bytes())
 		})
 	}
 }

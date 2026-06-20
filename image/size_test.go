@@ -4,12 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/matbur/image-text/image"
 )
 
-func Test_parseSize(t *testing.T) {
+func TestNewSizeFromString(t *testing.T) {
 	tests := []struct {
 		name   string
 		arg    string
@@ -64,6 +63,12 @@ func Test_parseSize(t *testing.T) {
 			width:  200,
 			height: 300,
 		},
+		{
+			name:   "named size",
+			arg:    "hd720",
+			width:  1280,
+			height: 720,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -73,13 +78,6 @@ func Test_parseSize(t *testing.T) {
 			assert.Equal(t, tt.height, size.Height())
 		})
 	}
-}
-
-func TestNamedSize(t *testing.T) {
-	size, err := image.NewSizeFromString("hd720")
-	require.NoError(t, err)
-	assert.Equal(t, 1280, size.Width())
-	assert.Equal(t, 720, size.Height())
 }
 
 func TestKnownSizeStrings(t *testing.T) {
