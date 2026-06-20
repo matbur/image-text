@@ -203,23 +203,12 @@ var docs = struct {
 		"with_names": "/hd720/steel_blue/yellow?text=rendered+text&font=ubuntu_mono",
 		"with_codes": "/320x200/000/FFFF00?font=open_sans",
 	},
+	Colors: image.KnownColorStrings(),
+	Sizes:  image.KnownSizeStrings(),
+	Fonts:  pie.Keys(image.KnownFonts()),
 }
 
 func handleDocs(w http.ResponseWriter, r *http.Request) {
-	sizes := map[string]string{}
-	for k, v := range image.KnownSizes() {
-		sizes[k] = v.String()
-	}
-	docs.Sizes = sizes
-
-	colors := map[string]string{}
-	for k, v := range image.KnownColors() {
-		colors[k] = v.String()
-	}
-	docs.Colors = colors
-
-	docs.Fonts = pie.Keys(image.KnownFonts())
-
 	js, err := json.Marshal(docs)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)

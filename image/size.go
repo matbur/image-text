@@ -69,6 +69,14 @@ func KnownSizes() map[string]Size {
 	return knownSizes
 }
 
+func KnownSizeStrings() map[string]string {
+	sizes := make(map[string]string, len(knownSizes))
+	for k, v := range knownSizes {
+		sizes[k] = v.String()
+	}
+	return sizes
+}
+
 var knownSizes = map[string]Size{
 	// Screen Standards
 	"cga":   NewSize(320, 200),

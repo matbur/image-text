@@ -103,6 +103,14 @@ func KnownColors() map[string]Color {
 	return knownColors
 }
 
+func KnownColorStrings() map[string]string {
+	colors := make(map[string]string, len(knownColors))
+	for k, v := range knownColors {
+		colors[k] = v.String()
+	}
+	return colors
+}
+
 var knownColors = map[string]Color{
 	"alice_blue":              NewColor(240, 248, 255),
 	"antique_white":           NewColor(250, 235, 215),
