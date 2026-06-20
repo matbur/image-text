@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"sort"
 	"time"
 
 	"github.com/a-h/templ"
@@ -32,7 +33,8 @@ func NewServer() chi.Router {
 	r.Post("/online/post", handleOnlinePost)
 	r.Get("/offline", handleOfflinePage)
 	r.Get("/favicon.ico", handleFavicon)
-	r.Get("/docs", handleDocs)
+	r.Get("/docs", handleDocsPage)
+	r.Get("/docs.json", handleDocsJSON)
 	r.Get("/resources/{filename}", handleStatic)
 	r.Get("/resources/fonts/{filename}", handleFontStatic)
 	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
@@ -215,7 +217,34 @@ var docs = struct {
 	Fonts:  pie.Keys(image.KnownFonts()),
 }
 
-func handleDocs(w http.ResponseWriter, r *http.Request) {
+func docsEntries(values map[string]string) []templates.DocsEntry {
+	names := pie.Keys(values)
+	sort.Strings(names)
+
+	entries := make([]templates.DocsEntry, len(names))
+	for i, name := range names {
+		entries[i] = templates.DocsEntry{
+			Name:  name,
+			Value: values[name],
+		}
+	}
+	return entries
+}
+
+func handleDocsPage(w http.ResponseWriter, r *http.Request) {
+	params := templates.DocsPageParams{
+		Path:         docs.Path,
+		Params:       docs.Params,
+		Examples:     docs.Examples,
+		ColorEntries: docsEntries(docs.Colors),
+		SizeEntries:  docsEntries(docs.Sizes),
+		Fonts:        docs.Fonts,
+	}
+	sort.Strings(params.Fonts)
+	templ.Handler(templates.DocsPage(params)).ServeHTTP(w, r)
+}
+
+func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(docs)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)

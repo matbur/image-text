@@ -94,6 +94,20 @@ templ head() {
 			width: auto;
 			max-width: 100%;
 		}
+
+		.docs-code {
+			background: var(--bs-secondary-bg);
+			border-radius: 0.375rem;
+			font-family: var(--bs-font-monospace);
+			font-size: 0.875rem;
+			padding: 0.75rem 1rem;
+			word-break: break-all;
+		}
+
+		.docs-scroll {
+			max-height: 16rem;
+			overflow-y: auto;
+		}
 	</style>
 	</head>
 }
@@ -562,4 +576,104 @@ templ Img(src string) {
 	<div id="image-result" class="page-preview text-center">
 		<img id="img" src={ src } class="img-fluid rounded" alt="Generated preview"/>
 	</div>
+}
+
+type DocsEntry struct {
+	Name  string
+	Value string
+}
+
+type DocsPageParams struct {
+	Path         string
+	Params       map[string]string
+	Examples     map[string]string
+	ColorEntries []DocsEntry
+	SizeEntries  []DocsEntry
+	Fonts        []string
+}
+
+templ DocsPage(params DocsPageParams) {
+	@layout() {
+		<div class="container py-4 py-lg-5" style="max-width: 52rem;">
+			<header class="page-hero mb-4">
+				<a href="/" class="text-decoration-none text-body-emphasis">
+					<h1 class="display-5 fw-bold mb-2">image-text</h1>
+				</a>
+				<p class="lead text-body-secondary mb-2">API documentation</p>
+				<a href="/docs.json" class="text-decoration-none link-secondary">JSON version</a>
+			</header>
+			<div class="card shadow-sm border-0 mb-4">
+				<div class="card-body">
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">URL pattern</h2>
+					<pre class="docs-code mb-0">{ params.Path }</pre>
+				</div>
+			</div>
+			<div class="card shadow-sm border-0 mb-4">
+				<div class="card-body">
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Query parameters</h2>
+					<dl class="row mb-0">
+						for name, value := range params.Params {
+							<dt class="col-sm-3">{ name }</dt>
+							<dd class="col-sm-9 text-body-secondary">{ value }</dd>
+						}
+					</dl>
+				</div>
+			</div>
+			<div class="card shadow-sm border-0 mb-4">
+				<div class="card-body">
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Examples</h2>
+					for name, value := range params.Examples {
+						<p class="fw-semibold mb-1">{ name }</p>
+						<pre class="docs-code">{ value }</pre>
+					}
+				</div>
+			</div>
+			<div class="row g-4">
+				<div class="col-md-4">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Colors</h2>
+							<div class="docs-scroll">
+								<dl class="row mb-0 small">
+									for _, entry := range params.ColorEntries {
+										<dt class="col-6">{ entry.Name }</dt>
+										<dd class="col-6 text-body-secondary mb-1">{ entry.Value }</dd>
+									}
+								</dl>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Sizes</h2>
+							<div class="docs-scroll">
+								<dl class="row mb-0 small">
+									for _, entry := range params.SizeEntries {
+										<dt class="col-6">{ entry.Name }</dt>
+										<dd class="col-6 text-body-secondary mb-1">{ entry.Value }</dd>
+									}
+								</dl>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Fonts</h2>
+							<div class="docs-scroll">
+								<ul class="list-unstyled small mb-0">
+									for _, font := range params.Fonts {
+										<li class="text-body-secondary">{ font }</li>
+									}
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
 }
