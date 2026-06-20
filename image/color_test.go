@@ -3,8 +3,9 @@ package image_test
 import (
 	"testing"
 
-	"github.com/matbur/image-text/image"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/matbur/image-text/image"
 )
 
 func Test_parseColor(t *testing.T) {

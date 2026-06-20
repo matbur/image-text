@@ -7,9 +7,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/matbur/image-text/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/matbur/image-text/server"
 )
 
 func TestImage(t *testing.T) {

@@ -1,3 +1,5 @@
+MODULE := $(shell grep '^module ' go.mod | cut -d' ' -f2)
+
 .PHONY: help install-tools
 help:
 	@grep -E '^[a-zA-Z][a-zA-Z0-9_.-]*:([^=]|$$)' $(MAKEFILE_LIST) | cut -d: -f1 | sort -u
@@ -11,7 +13,7 @@ start:
 	docker compose up -d --build
 
 stop:
-	docker compose down
+	docker compose down --remove-orphans
 
 reload: stop start
 
@@ -19,10 +21,10 @@ logs:
 	docker compose logs -f
 
 test:
-	go test ./...
+	go test -v -race -count=1 -timeout=60s -shuffle=on -failfast -cover ./...
 
 goimports:
-	goimports -w -local $(cat go.mod | grep "^module " | cut -d' ' -f 2) .
+	goimports -w -local $(MODULE) .
 
 templ:
 	templ fmt .
