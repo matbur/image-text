@@ -57,6 +57,43 @@ templ head() {
 		[data-bs-theme="dark"] .theme-toggle-btn .theme-icon-dark {
 			display: inline;
 		}
+
+		.index-hero {
+			max-width: 40rem;
+		}
+
+		.page-hero {
+			max-width: 40rem;
+		}
+
+		.page-preview img {
+			max-width: 100%;
+		}
+
+		.index-card {
+			transition: transform 0.2s ease, box-shadow 0.2s ease;
+		}
+
+		.index-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12) !important;
+		}
+
+		[data-bs-theme="dark"] .index-card:hover {
+			box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.45) !important;
+		}
+
+		.index-card-logo-wrap {
+			background: var(--bs-secondary-bg);
+			padding: 2rem 1.5rem;
+			text-align: center;
+		}
+
+		.index-card-logo {
+			height: 4rem;
+			width: auto;
+			max-width: 100%;
+		}
 	</style>
 	</head>
 }
@@ -182,31 +219,40 @@ type IndexPageParams struct{}
 templ IndexPage(params IndexPageParams) {
 	@layout() {
 		@githubCorner()
-		<div class="container centered-container d-flex justify-content-center align-items-center">
-			<div class="row" hx-boost="false">
-				<a href="/" class="text-decoration-none text-body-emphasis">
-					<h1>image-text</h1>
-				</a>
-				<a href="/docs" class="text-decoration-none text-body-emphasis">📄 docs</a>
-				<div class="col-md-6">
-					<div class="card mb-4" style="width: 18rem;">
-						<a href="/online" class="text-decoration-none">
-							<img src="/resources/htmx.png" class="card-img-top"/>
-						</a>
-						<div class="card-body">
-							<p class="card-text">Every image generation will be done on a backend</p>
-							<a href="/online" class="btn btn-primary">Go with online</a>
+		<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4">
+			<header class="index-hero text-center mb-5">
+				<h1 class="display-4 fw-bold mb-2">image-text</h1>
+				<p class="lead text-body-secondary mb-3">Generate placeholder images with custom text, colors, sizes, and fonts.</p>
+				<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
+			</header>
+			<div class="row g-4 justify-content-center w-100" style="max-width: 44rem;" hx-boost="false">
+				<div class="col-sm-6">
+					<div class="card index-card h-100 shadow-sm border-0">
+						<div class="index-card-logo-wrap">
+							<img src="/resources/htmx.png" class="index-card-logo" alt="HTMX"/>
+						</div>
+						<div class="card-body d-flex flex-column">
+							<div class="d-flex align-items-center gap-2 mb-2">
+								<h2 class="h5 card-title mb-0">Online</h2>
+								<span class="badge text-bg-primary">server</span>
+							</div>
+							<p class="card-text text-body-secondary flex-grow-1">Render images on the backend with HTMX-powered forms.</p>
+							<a href="/online" class="btn btn-primary mt-2">Try online</a>
 						</div>
 					</div>
 				</div>
-				<div class="col-md-6">
-					<div class="card mb-4" style="width: 18rem;">
-						<a href="/offline" class="text-decoration-none">
-							<img src="/resources/wasm.png" class="card-img-top"/>
-						</a>
-						<div class="card-body">
-							<p class="card-text">Every image generation will be done on a browser</p>
-							<a href="/offline" class="btn btn-primary">Go with offline</a>
+				<div class="col-sm-6">
+					<div class="card index-card h-100 shadow-sm border-0">
+						<div class="index-card-logo-wrap">
+							<img src="/resources/wasm.png" class="index-card-logo" alt="WebAssembly"/>
+						</div>
+						<div class="card-body d-flex flex-column">
+							<div class="d-flex align-items-center gap-2 mb-2">
+								<h2 class="h5 card-title mb-0">Offline</h2>
+								<span class="badge text-bg-secondary">browser</span>
+							</div>
+							<p class="card-text text-body-secondary flex-grow-1">Render images locally in your browser using WebAssembly.</p>
+							<a href="/offline" class="btn btn-outline-primary mt-2">Try offline</a>
 						</div>
 					</div>
 				</div>
@@ -228,10 +274,16 @@ type OnlinePageParams struct {
 	FontOptions  []string `json:"-"`
 }
 
-templ pageTitle(label string) {
-	<a href="/" class="text-decoration-none text-body-emphasis">
-		<h1>image-text <span class="badge bg-secondary ms-2 align-middle fs-6 fw-normal">{ label }</span></h1>
-	</a>
+templ pageHeader(label string, badgeClass string, description string) {
+	<header class="page-hero mb-4">
+		<a href="/" class="text-decoration-none text-body-emphasis">
+			<h1 class="display-5 fw-bold mb-2">
+				image-text <span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>{ label }</span>
+			</h1>
+		</a>
+		<p class="text-body-secondary mb-2">{ description }</p>
+		<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
+	</header>
 }
 
 templ fontOptions(selected string, options []string) {
@@ -246,82 +298,94 @@ templ fontOptions(selected string, options []string) {
 
 templ OnlinePage(params OnlinePageParams) {
 	@layout() {
-		<div class="container mt-5">
-			<div class="row">
-				<div class="col">
-					@pageTitle("online")
-					<form method="post" action="/online" hx-ext="json-enc" hx-post="/online/post" hx-target="#image-result">
-						<div class="row mb-3">
-							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
-							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="bg_color"
-									value={ params.BgColor }
-									name="bg_color"
-									list="bg_color_options"
-								/>
-								<datalist id="bg_color_options">
-									for _, c := range params.ColorOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
+		<div class="container py-4 py-lg-5" style="max-width: 52rem;">
+			@pageHeader("online", "text-bg-primary", "Render images on the backend with HTMX-powered forms.")
+			<div class="row g-4">
+				<div class="col-lg-7">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Settings</h2>
+							<form method="post" action="/online" hx-ext="json-enc" hx-post="/online/post" hx-target="#image-result">
+								<div class="row mb-3">
+									<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+									<div class="col-sm-10">
+										<input
+											type="text"
+											class="form-control"
+											id="bg_color"
+											value={ params.BgColor }
+											name="bg_color"
+											list="bg_color_options"
+										/>
+										<datalist id="bg_color_options">
+											for _, c := range params.ColorOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+									<div class="col-sm-10">
+										<input
+											type="text"
+											class="form-control"
+											id="fg_color"
+											value={ params.FgColor }
+											name="fg_color"
+											list="fg_color_options"
+										/>
+										<datalist id="fg_color_options">
+											for _, c := range params.ColorOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="size" class="col-sm-2 col-form-label">Size</label>
+									<div class="col-sm-10">
+										<input
+											type="size"
+											class="form-control"
+											id="size"
+											value={ params.Size }
+											name="size"
+											list="size_options"
+										/>
+										<datalist id="size_options">
+											for _, c := range params.SizeOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="font" class="col-sm-2 col-form-label">Font</label>
+									<div class="col-sm-10">
+										<select class="form-select" id="font" name="font" onchange="this.form.requestSubmit()">
+											@fontOptions(params.Font, params.FontOptions)
+										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="text" class="col-sm-2 col-form-label">Text</label>
+									<div class="col-sm-10">
+										<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
+									</div>
+								</div>
+								<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Generate image</button>
+							</form>
 						</div>
-						<div class="row mb-3">
-							<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
-							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="fg_color"
-									value={ params.FgColor }
-									name="fg_color"
-									list="fg_color_options"
-								/>
-								<datalist id="fg_color_options">
-									for _, c := range params.ColorOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
+					</div>
+				</div>
+				<div class="col-lg-5">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Preview</h2>
+							@Img(params.Image)
 						</div>
-						<div class="row mb-3">
-							<label for="size" class="col-sm-2 col-form-label">Size</label>
-							<div class="col-sm-10">
-								<input
-									type="size"
-									class="form-control"
-									id="size"
-									value={ params.Size }
-									name="size"
-									list="size_options"
-								/>
-								<datalist id="size_options">
-									for _, c := range params.SizeOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<label for="font" class="col-sm-2 col-form-label">Font</label>
-							<div class="col-sm-10">
-								<select class="form-select" id="font" name="font" onchange="this.form.requestSubmit()">
-									@fontOptions(params.Font, params.FontOptions)
-								</select>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<label for="text" class="col-sm-2 col-form-label">Text</label>
-							<div class="col-sm-10">
-								<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
-							</div>
-						</div>
-						<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Submit</button>
-					</form>
-					@Img(params.Image)
+					</div>
 				</div>
 			</div>
 		</div>
@@ -332,88 +396,100 @@ type OfflinePageParams OnlinePageParams
 
 templ OfflinePage(params OfflinePageParams) {
 	@layout() {
-		<div class="container mt-5" hx-boost="false">
-			<div class="row">
-				<div class="col">
-					@pageTitle("offline")
-					<form onsubmit="callGoFunction(); return false;">
-						<div class="row mb-3">
-							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
-							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="bg_color"
-									value="steel_blue"
-									name="bg_color"
-									list="bg_color_options"
-								/>
-								<datalist id="bg_color_options">
-									for _, c := range params.ColorOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
+		<div class="container py-4 py-lg-5" style="max-width: 52rem;" hx-boost="false">
+			@pageHeader("offline", "text-bg-secondary", "Render images locally in your browser using WebAssembly.")
+			<div class="row g-4">
+				<div class="col-lg-7">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Settings</h2>
+							<form onsubmit="callGoFunction(); return false;">
+								<div class="row mb-3">
+									<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+									<div class="col-sm-10">
+										<input
+											type="text"
+											class="form-control"
+											id="bg_color"
+											value="steel_blue"
+											name="bg_color"
+											list="bg_color_options"
+										/>
+										<datalist id="bg_color_options">
+											for _, c := range params.ColorOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+									<div class="col-sm-10">
+										<input
+											type="text"
+											class="form-control"
+											id="fg_color"
+											value="yellow"
+											name="fg_color"
+											list="fg_color_options"
+										/>
+										<datalist id="fg_color_options">
+											for _, c := range params.ColorOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="size" class="col-sm-2 col-form-label">Size</label>
+									<div class="col-sm-10">
+										<input
+											type="size"
+											class="form-control"
+											id="size"
+											value="vga"
+											name="size"
+											list="size_options"
+										/>
+										<datalist id="size_options">
+											for _, c := range params.SizeOptions {
+												<option value={ c }></option>
+											}
+										</datalist>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="font" class="col-sm-2 col-form-label">Font</label>
+									<div class="col-sm-10">
+										<select class="form-select" id="font" name="font" onchange="callGoFunction()">
+											@fontOptions(params.Font, params.FontOptions)
+										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<label for="text" class="col-sm-2 col-form-label">Text</label>
+									<div class="col-sm-10">
+										<input
+											type="text"
+											class="form-control"
+											id="text"
+											value={ params.Text }
+											name="text"
+										/>
+									</div>
+								</div>
+								<button type="submit" class="btn btn-outline-primary" onmousedown="event.preventDefault()">Generate image</button>
+							</form>
 						</div>
-						<div class="row mb-3">
-							<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
-							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="fg_color"
-									value="yellow"
-									name="fg_color"
-									list="fg_color_options"
-								/>
-								<datalist id="fg_color_options">
-									for _, c := range params.ColorOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
+					</div>
+				</div>
+				<div class="col-lg-5">
+					<div class="card shadow-sm border-0 h-100">
+						<div class="card-body">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Preview</h2>
+							@Img("")
 						</div>
-						<div class="row mb-3">
-							<label for="size" class="col-sm-2 col-form-label">Size</label>
-							<div class="col-sm-10">
-								<input
-									type="size"
-									class="form-control"
-									id="size"
-									value="vga"
-									name="size"
-									list="size_options"
-								/>
-								<datalist id="size_options">
-									for _, c := range params.SizeOptions {
-										<option value={ c }></option>
-									}
-								</datalist>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<label for="font" class="col-sm-2 col-form-label">Font</label>
-							<div class="col-sm-10">
-								<select class="form-select" id="font" name="font" onchange="callGoFunction()">
-									@fontOptions(params.Font, params.FontOptions)
-								</select>
-							</div>
-						</div>
-						<div class="row mb-3">
-							<label for="text" class="col-sm-2 col-form-label">Text</label>
-							<div class="col-sm-10">
-								<input
-									type="text"
-									class="form-control"
-									id="text"
-									value={ params.Text }
-									name="text"
-								/>
-							</div>
-						</div>
-						<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Submit</button>
-					</form>
-					@Img("")
+					</div>
 				</div>
 			</div>
 		</div>
@@ -483,7 +559,7 @@ templ OfflinePage(params OfflinePageParams) {
 }
 
 templ Img(src string) {
-	<div id="image-result" class="mt-3">
-		<img id="img" src={ src } style="max-width:100%;"/>
+	<div id="image-result" class="page-preview text-center">
+		<img id="img" src={ src } class="img-fluid rounded" alt="Generated preview"/>
 	</div>
 }
