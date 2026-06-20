@@ -211,10 +211,22 @@ type OnlinePageParams struct {
 	BgColor string `json:"bg_color"`
 	FgColor string `json:"fg_color"`
 	Size    string `json:"size"`
+	Font    string `json:"font"`
 	Image   string `json:"-"`
 
 	ColorOptions []string `json:"-"`
 	SizeOptions  []string `json:"-"`
+	FontOptions  []string `json:"-"`
+}
+
+templ fontOptions(selected string, options []string) {
+	for _, option := range options {
+		if option == selected {
+			<option value={ option } selected>{ option }</option>
+		} else {
+			<option value={ option }>{ option }</option>
+		}
+	}
 }
 
 templ OnlinePage(params OnlinePageParams) {
@@ -278,6 +290,14 @@ templ OnlinePage(params OnlinePageParams) {
 										<option value={ c }></option>
 									}
 								</datalist>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<label for="font" class="col-sm-2 col-form-label">Font</label>
+							<div class="col-sm-10">
+								<select class="form-select" id="font" name="font" onchange="this.form.requestSubmit()">
+									@fontOptions(params.Font, params.FontOptions)
+								</select>
 							</div>
 						</div>
 						<div class="row mb-3">
@@ -361,6 +381,14 @@ templ OfflinePage(params OfflinePageParams) {
 							</div>
 						</div>
 						<div class="row mb-3">
+							<label for="font" class="col-sm-2 col-form-label">Font</label>
+							<div class="col-sm-10">
+								<select class="form-select" id="font" name="font" onchange="callGoFunction()">
+									@fontOptions(params.Font, params.FontOptions)
+								</select>
+							</div>
+						</div>
+						<div class="row mb-3">
 							<label for="text" class="col-sm-2 col-form-label">Text</label>
 							<div class="col-sm-10">
 								<input
@@ -418,6 +446,7 @@ templ OfflinePage(params OfflinePageParams) {
 		bgColor: getValue("bg_color"),
 		fgColor: getValue("fg_color"),
 		size: getValue("size"),
+		font: getValue("font"),
 		text: getValue("text"),
 	})
 

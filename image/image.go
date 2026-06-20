@@ -10,25 +10,26 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+
+	"github.com/golang/freetype/truetype"
 )
 
 var (
 	errorMissing    = errors.New("missing value")
 	errorMalformed  = errors.New("malformed value")
 	errorUnexpected = errors.New("unexpected error")
-
-	ubuntuMono = loadUbuntuMono()
 )
 
 type Image struct {
 	size   Size
 	bg     Color
 	fg     Color
+	font   *truetype.Font
 	text   string
 	canvas *image.RGBA
 }
 
-func New(size, background, foreground, text string) (*Image, error) {
+func New(size, background, foreground, text, fontName string) (*Image, error) {
 	var err error
 
 	s, err := NewSizeFromString(size)
@@ -46,6 +47,11 @@ func New(size, background, foreground, text string) (*Image, error) {
 		err = multierror.Append(err, fmt.Errorf("failed to create foreground color: %w", err))
 	}
 
+	fnt, err := NewFontFromString(fontName)
+	if err != nil {
+		err = multierror.Append(err, fmt.Errorf("failed to create font: %w", err))
+	}
+
 	if text == "" {
 		text = s.String()
 	}
@@ -56,6 +62,7 @@ func New(size, background, foreground, text string) (*Image, error) {
 		size:   s,
 		bg:     bg,
 		fg:     fg,
+		font:   fnt,
 		text:   text,
 		canvas: canvas,
 	}, err
@@ -83,7 +90,7 @@ func (img *Image) drawLabel() {
 	const scale = .95
 
 	height := int(scale * float64(min(img.size.Height(), 2*img.size.Width()/max(len(img.text), 1))))
-	face := loadFace(height)
+	face := loadFace(img.font, height)
 
 	width := font.MeasureString(face, img.text).Round()
 	x := (img.size.Width() - width) / 2

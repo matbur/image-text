@@ -61,12 +61,14 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 	fgColor := q.Get("fg_color")
 	size := q.Get("size")
 
+	font := q.Get("font")
 	if bgColor == "" || fgColor == "" || size == "" {
 		q := url.Values{}
 		q.Set("text", text)
 		q.Set("bg_color", cmp.Or(bgColor, "steel_blue"))
 		q.Set("fg_color", cmp.Or(fgColor, "yellow"))
 		q.Set("size", cmp.Or(size, "vga"))
+		q.Set("font", cmp.Or(font, "ubuntu_mono"))
 
 		u := url.URL{Path: "/online", RawQuery: q.Encode()}
 
@@ -74,7 +76,10 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := &url.URL{Path: "/", RawQuery: q.Encode()}
+	imageQuery := url.Values{}
+	imageQuery.Set("text", text)
+	imageQuery.Set("font", cmp.Or(font, "ubuntu_mono"))
+	u := &url.URL{Path: "/", RawQuery: imageQuery.Encode()}
 	u = u.JoinPath(size, bgColor, fgColor)
 
 	params := templates.OnlinePageParams{
@@ -82,9 +87,11 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 		BgColor:      bgColor,
 		FgColor:      fgColor,
 		Size:         size,
+		Font:         cmp.Or(font, "ubuntu_mono"),
 		Image:        u.String(),
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
+		FontOptions:  pie.Keys(image.KnownFonts()),
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
@@ -114,18 +121,23 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	q.Set("bg_color", params.BgColor)
 	q.Set("fg_color", params.FgColor)
 	q.Set("size", params.Size)
+	q.Set("font", cmp.Or(params.Font, "ubuntu_mono"))
 
 	u := &url.URL{Path: "/online", RawQuery: q.Encode()}
 	w.Header().Set("HX-Push-Url", u.String())
 	slog.Info("Pushing", "url", u.String())
 
-	u2 := &url.URL{RawQuery: url.Values{"text": {params.Text}}.Encode()}
+	u2 := &url.URL{RawQuery: url.Values{
+		"text": {params.Text},
+		"font": {cmp.Or(params.Font, "ubuntu_mono")},
+	}.Encode()}
 	u2 = u2.JoinPath(params.Size, params.BgColor, params.FgColor)
 	slog.Info("Image url", "url", u2.String())
 
 	params.Image = u2.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
+	params.FontOptions = pie.Keys(image.KnownFonts())
 	if r.Header.Get("HX-Request") != "" {
 		templ.Handler(templates.Img(params.Image)).ServeHTTP(w, r)
 		return
@@ -140,10 +152,11 @@ func handleImage(w http.ResponseWriter, r *http.Request) {
 	bgColor := chi.URLParam(r, "bg_color")
 	fgColor := chi.URLParam(r, "fg_color")
 	text := r.URL.Query().Get("text")
+	font := r.URL.Query().Get("font")
 
 	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
-	img, err := image.New(size, bgColor, fgColor, text)
+	img, err := image.New(size, bgColor, fgColor, text, font)
 	if err != nil {
 		writeJSON(w, err.Error(), http.StatusBadRequest)
 		return
@@ -175,14 +188,20 @@ func handleFavicon(w http.ResponseWriter, r *http.Request) {
 
 var docs = struct {
 	Path     string            `json:"path"`
+	Params   map[string]string `json:"params"`
 	Examples map[string]string `json:"example"`
 	Colors   map[string]string `json:"colors"`
 	Sizes    map[string]string `json:"sizes"`
+	Fonts    []string          `json:"fonts"`
 }{
-	Path: "HOST/size/background/foreground?text=rendered+text",
+	Path: "HOST/size/background/foreground?text=rendered+text&font=ubuntu_mono",
+	Params: map[string]string{
+		"text": "rendered text (optional, defaults to size)",
+		"font": "font name (optional, defaults to ubuntu_mono)",
+	},
 	Examples: map[string]string{
-		"with_names": "/hd720/steel_blue/yellow?text=rendered+text",
-		"with_codes": "/320x200/000/FFFF00",
+		"with_names": "/hd720/steel_blue/yellow?text=rendered+text&font=ubuntu_mono",
+		"with_codes": "/320x200/000/FFFF00?font=open_sans",
 	},
 }
 
@@ -199,6 +218,8 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 	}
 	docs.Colors = colors
 
+	docs.Fonts = pie.Keys(image.KnownFonts())
+
 	js, err := json.Marshal(docs)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)
@@ -213,8 +234,10 @@ func handleDocs(w http.ResponseWriter, r *http.Request) {
 
 func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
 	params := templates.OfflinePageParams{
+		Font:         "ubuntu_mono",
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
+		FontOptions:  pie.Keys(image.KnownFonts()),
 	}
 	templ.Handler(templates.OfflinePage(params)).ServeHTTP(w, r)
 }

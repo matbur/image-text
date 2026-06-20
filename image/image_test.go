@@ -38,7 +38,7 @@ func TestImage(t *testing.T) {
 	for _, tt := range tests {
 		name := tt.size + "-" + tt.bgColor + "-" + tt.fgColor + "-" + tt.text + ".png"
 		t.Run(name, func(t *testing.T) {
-			img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text)
+			img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text, "")
 			require.NoError(t, err)
 
 			var buf bytes.Buffer
