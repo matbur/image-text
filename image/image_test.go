@@ -56,3 +56,38 @@ func TestImage(t *testing.T) {
 		})
 	}
 }
+
+func TestNewDefaultsEmptyText(t *testing.T) {
+	img, err := image.New("vga", "steel_blue", "yellow", "", "")
+	require.NoError(t, err)
+	assert.Equal(t, "640x480", img.Text())
+}
+
+func TestNewInvalidParams(t *testing.T) {
+	img, err := image.New("bad", "bad", "bad", "hello", "bad")
+	require.Error(t, err)
+	require.NotNil(t, img)
+
+	var buf bytes.Buffer
+	require.NoError(t, img.Draw(&buf))
+	assertValidPNG(t, buf.Bytes(), 640, 480)
+}
+
+func TestNewWithFont(t *testing.T) {
+	img, err := image.New("320x200", "000", "fff", "hello", "open_sans")
+	require.NoError(t, err)
+
+	var buf bytes.Buffer
+	require.NoError(t, img.Draw(&buf))
+	assertValidPNG(t, buf.Bytes(), 320, 200)
+}
+
+func TestImageAccessors(t *testing.T) {
+	img, err := image.New("vga", "steel_blue", "yellow", "hello", "ubuntu_mono")
+	require.NoError(t, err)
+
+	assert.Equal(t, "hello", img.Text())
+	assert.Equal(t, "640x480", img.Size())
+	assert.Equal(t, "4682b4", img.BgColor())
+	assert.Equal(t, "ffff00", img.FgColor())
+}

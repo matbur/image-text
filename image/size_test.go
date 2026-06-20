@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/matbur/image-text/image"
 )
@@ -72,4 +73,25 @@ func Test_parseSize(t *testing.T) {
 			assert.Equal(t, tt.height, size.Height())
 		})
 	}
+}
+
+func TestNamedSize(t *testing.T) {
+	size, err := image.NewSizeFromString("hd720")
+	require.NoError(t, err)
+	assert.Equal(t, 1280, size.Width())
+	assert.Equal(t, 720, size.Height())
+}
+
+func TestKnownSizeStrings(t *testing.T) {
+	sizes := image.KnownSizeStrings()
+	assert.Contains(t, sizes, "vga")
+	assert.Equal(t, "640x480", sizes["vga"])
+	assert.Len(t, sizes, len(image.KnownSizes()))
+}
+
+func TestDefaultSize(t *testing.T) {
+	size := image.DefaultSize()
+	assert.Equal(t, 640, size.Width())
+	assert.Equal(t, 480, size.Height())
+	assert.Equal(t, "640x480", size.String())
 }

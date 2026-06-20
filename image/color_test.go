@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/matbur/image-text/image"
 )
@@ -78,4 +79,23 @@ func Test_parseColor(t *testing.T) {
 			assert.Equal(t, tt.color, color)
 		})
 	}
+}
+
+func TestNamedColor(t *testing.T) {
+	color, err := image.NewColorFromString("steel_blue")
+	require.NoError(t, err)
+	assert.Equal(t, image.NewColor(70, 130, 180), color)
+}
+
+func TestKnownColorStrings(t *testing.T) {
+	names := image.KnownColorStrings()
+	assert.Contains(t, names, "steel_blue")
+	assert.Equal(t, "4682b4", names["steel_blue"])
+	assert.Len(t, names, len(image.KnownColors()))
+}
+
+func TestNewForegroundColorFromStringInvalid(t *testing.T) {
+	color, err := image.NewForegroundColorFromString("not-a-color")
+	require.Error(t, err)
+	assert.Equal(t, image.DefaultForegroundColor(), color)
 }

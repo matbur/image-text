@@ -25,3 +25,13 @@ func TestNewFontFromString(t *testing.T) {
 	_, err = image.NewFontFromString("not_a_font")
 	require.Error(t, err)
 }
+
+func TestNewFontFromStringDefault(t *testing.T) {
+	fnt, err := image.NewFontFromString("")
+	require.NoError(t, err)
+	require.NotNil(t, fnt)
+
+	fnt, err = image.NewFontFromString("UBUNTU_MONO")
+	require.NoError(t, err)
+	require.NotNil(t, fnt)
+}
