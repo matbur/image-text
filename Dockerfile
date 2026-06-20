@@ -6,7 +6,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v -o bin ./cmd/image-text
+ARG COMMIT_SHA=dev
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=readonly -v \
+	-ldflags "-X github.com/matbur/image-text/version.Commit=${COMMIT_SHA}" \
+	-o bin ./cmd/image-text
 
 
 FROM scratch

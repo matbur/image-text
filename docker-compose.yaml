@@ -2,5 +2,7 @@ services:
   image-text:
     build:
       dockerfile: Dockerfile
+      args:
+        COMMIT_SHA: ${COMMIT_SHA:-dev}
     ports:
       - "8022:8080"

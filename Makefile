@@ -1,4 +1,6 @@
 MODULE := $(shell grep '^module ' go.mod | cut -d' ' -f2)
+COMMIT_SHA := $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
+LDFLAGS := -X $(MODULE)/version.Commit=$(COMMIT_SHA)
 
 .PHONY: help install-tools
 help:
@@ -11,7 +13,7 @@ install-tools:
 	@command -v wasm-opt >/dev/null 2>&1 || echo "Install binaryen for wasm-opt (e.g. brew install binaryen)"
 
 start:
-	docker compose up -d --build
+	COMMIT_SHA=$(COMMIT_SHA) docker compose up -d --build
 
 stop:
 	docker compose down --remove-orphans
@@ -32,7 +34,7 @@ templ:
 	templ generate
 
 build-local: goimports templ build-wasm
-	go build -o ./tmp/main ./cmd/image-text 
+	go build -ldflags "$(LDFLAGS)" -o ./tmp/main ./cmd/image-text
 
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o wasm/main.wasm ./cmd/wasm/main.go

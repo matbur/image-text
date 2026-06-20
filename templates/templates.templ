@@ -35,8 +35,7 @@ templ head() {
 		}
 
 		.centered-container {
-			height: 100vh;
-			/* Full viewport height */
+			min-height: 0;
 		}
 
 		.theme-toggle-btn {
@@ -110,6 +109,15 @@ templ head() {
 		}
 	</style>
 	</head>
+}
+
+templ buildVersionFooter(commitSHA string) {
+	if commitSHA != "" {
+		<footer class="build-version-footer text-center small text-body-secondary py-3 border-top">
+			<span>Build version</span>
+			<a href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) } class="text-decoration-none link-secondary font-monospace ms-1">{ commitSHA }</a>
+		</footer>
+	}
 }
 
 templ themeToggle() {
@@ -228,49 +236,54 @@ templ layout() {
 	</html>
 }
 
-type IndexPageParams struct{}
+type IndexPageParams struct {
+	CommitSHA string
+}
 
 templ IndexPage(params IndexPageParams) {
 	@layout() {
 		@githubCorner()
-		<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4">
-			<header class="index-hero text-center mb-5">
-				<h1 class="display-4 fw-bold mb-2">image-text</h1>
-				<p class="lead text-body-secondary mb-3">Generate placeholder images with custom text, colors, sizes, and fonts.</p>
-				<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
-			</header>
-			<div class="row g-4 justify-content-center w-100" style="max-width: 44rem;" hx-boost="false">
-				<div class="col-sm-6">
-					<div class="card index-card h-100 shadow-sm border-0">
-						<div class="index-card-logo-wrap">
-							<img src="/resources/htmx.png" class="index-card-logo" alt="HTMX"/>
-						</div>
-						<div class="card-body d-flex flex-column">
-							<div class="d-flex align-items-center gap-2 mb-2">
-								<h2 class="h5 card-title mb-0">Online</h2>
-								<span class="badge text-bg-primary">server</span>
+		<div class="d-flex flex-column min-vh-100">
+			<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4 flex-grow-1">
+				<header class="index-hero text-center mb-5">
+					<h1 class="display-4 fw-bold mb-2">image-text</h1>
+					<p class="lead text-body-secondary mb-3">Generate placeholder images with custom text, colors, sizes, and fonts.</p>
+					<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
+				</header>
+				<div class="row g-4 justify-content-center w-100" style="max-width: 44rem;" hx-boost="false">
+					<div class="col-sm-6">
+						<div class="card index-card h-100 shadow-sm border-0">
+							<div class="index-card-logo-wrap">
+								<img src="/resources/htmx.png" class="index-card-logo" alt="HTMX"/>
 							</div>
-							<p class="card-text text-body-secondary flex-grow-1">Render images on the backend with HTMX-powered forms.</p>
-							<a href="/online" class="btn btn-primary mt-2">Try online</a>
+							<div class="card-body d-flex flex-column">
+								<div class="d-flex align-items-center gap-2 mb-2">
+									<h2 class="h5 card-title mb-0">Online</h2>
+									<span class="badge text-bg-primary">server</span>
+								</div>
+								<p class="card-text text-body-secondary flex-grow-1">Render images on the backend with HTMX-powered forms.</p>
+								<a href="/online" class="btn btn-primary mt-2">Try online</a>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="col-sm-6">
-					<div class="card index-card h-100 shadow-sm border-0">
-						<div class="index-card-logo-wrap">
-							<img src="/resources/wasm.png" class="index-card-logo" alt="WebAssembly"/>
-						</div>
-						<div class="card-body d-flex flex-column">
-							<div class="d-flex align-items-center gap-2 mb-2">
-								<h2 class="h5 card-title mb-0">Offline</h2>
-								<span class="badge text-bg-secondary">browser</span>
+					<div class="col-sm-6">
+						<div class="card index-card h-100 shadow-sm border-0">
+							<div class="index-card-logo-wrap">
+								<img src="/resources/wasm.png" class="index-card-logo" alt="WebAssembly"/>
 							</div>
-							<p class="card-text text-body-secondary flex-grow-1">Render images locally in your browser using WebAssembly.</p>
-							<a href="/offline" class="btn btn-outline-primary mt-2">Try offline</a>
+							<div class="card-body d-flex flex-column">
+								<div class="d-flex align-items-center gap-2 mb-2">
+									<h2 class="h5 card-title mb-0">Offline</h2>
+									<span class="badge text-bg-secondary">browser</span>
+								</div>
+								<p class="card-text text-body-secondary flex-grow-1">Render images locally in your browser using WebAssembly.</p>
+								<a href="/offline" class="btn btn-outline-primary mt-2">Try offline</a>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+			@buildVersionFooter(params.CommitSHA)
 		</div>
 	}
 }

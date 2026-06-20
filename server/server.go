@@ -19,6 +19,7 @@ import (
 	"github.com/matbur/image-text/image"
 	"github.com/matbur/image-text/resources"
 	"github.com/matbur/image-text/templates"
+	"github.com/matbur/image-text/version"
 	"github.com/matbur/image-text/wasm"
 )
 
@@ -69,7 +70,9 @@ func handleFontStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
-	templ.Handler(templates.IndexPage(templates.IndexPageParams{})).ServeHTTP(w, r)
+	templ.Handler(templates.IndexPage(templates.IndexPageParams{
+		CommitSHA: version.Commit,
+	})).ServeHTTP(w, r)
 }
 
 func handleOnlinePage(w http.ResponseWriter, r *http.Request) {

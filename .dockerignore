@@ -5,6 +5,7 @@
 !resources/
 !server/
 !templates/
+!version/
 !wasm/
 !go.mod
 !go.sum
