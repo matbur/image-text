@@ -241,7 +241,7 @@ func OnlinePage(params OnlinePageParams) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-5\"><div class=\"row\"><div class=\"col\"><a href=\"/\"><h1>image-text</h1></a><form method=\"post\" action=\"/online\" hx-post=\"/online/post\" hx-target=\"body\"><div class=\"row mb-3\"><label for=\"bg_color\" class=\"col-sm-2 col-form-label\">Background color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"bg_color\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-5\"><div class=\"row\"><div class=\"col\"><a href=\"/\"><h1>image-text</h1></a><form method=\"post\" action=\"/online\" hx-post=\"/online/post\" hx-target=\"#image-result\"><div class=\"row mb-3\"><label for=\"bg_color\" class=\"col-sm-2 col-form-label\">Background color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"bg_color\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -362,11 +362,11 @@ func OnlinePage(params OnlinePageParams) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"text\"></div></div><button type=\"submit\" class=\"btn btn-primary\">Submit</button></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"text\"></div></div><button type=\"submit\" class=\"btn btn-primary\" onmousedown=\"event.preventDefault()\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = img(params.Image).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Img(params.Image).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -419,7 +419,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-5\"><div class=\"row\"><div class=\"col\"><a href=\"/\"><h1>image-text</h1></a><div class=\"row mb-3\"><label for=\"bg_color\" class=\"col-sm-2 col-form-label\">Background color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"bg_color\" value=\"steel_blue\" name=\"bg_color\" list=\"bg_color_options\" onchange=\"callGoFunction()\"> <datalist id=\"bg_color_options\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-5\"><div class=\"row\"><div class=\"col\"><a href=\"/\"><h1>image-text</h1></a><form onsubmit=\"callGoFunction(); return false;\"><div class=\"row mb-3\"><label for=\"bg_color\" class=\"col-sm-2 col-form-label\">Background color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"bg_color\" value=\"steel_blue\" name=\"bg_color\" list=\"bg_color_options\"> <datalist id=\"bg_color_options\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -431,7 +431,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(c)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 322, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 322, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -442,7 +442,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist></div></div><div class=\"row mb-3\"><label for=\"fg_color\" class=\"col-sm-2 col-form-label\">Text color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"fg_color\" value=\"yellow\" name=\"fg_color\" list=\"fg_color_options\" onchange=\"callGoFunction()\"> <datalist id=\"fg_color_options\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist></div></div><div class=\"row mb-3\"><label for=\"fg_color\" class=\"col-sm-2 col-form-label\">Text color</label><div class=\"col-sm-10\"><input type=\"text\" class=\"form-control\" id=\"fg_color\" value=\"yellow\" name=\"fg_color\" list=\"fg_color_options\"> <datalist id=\"fg_color_options\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -454,7 +454,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(c)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 341, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 340, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -465,7 +465,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist></div></div><div class=\"row mb-3\"><label for=\"size\" class=\"col-sm-2 col-form-label\">Size</label><div class=\"col-sm-10\"><input type=\"size\" class=\"form-control\" id=\"size\" value=\"vga\" name=\"size\" list=\"size_options\" onchange=\"callGoFunction()\"> <datalist id=\"size_options\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</datalist></div></div><div class=\"row mb-3\"><label for=\"size\" class=\"col-sm-2 col-form-label\">Size</label><div class=\"col-sm-10\"><input type=\"size\" class=\"form-control\" id=\"size\" value=\"vga\" name=\"size\" list=\"size_options\"> <datalist id=\"size_options\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -477,7 +477,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(c)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 360, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 358, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -495,21 +495,21 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(params.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 372, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 370, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"text\" onchange=\"callGoFunction()\"></div></div><button type=\"submit\" class=\"btn btn-primary\" disabled>Submit</button>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"text\"></div></div><button type=\"submit\" class=\"btn btn-primary\" onmousedown=\"event.preventDefault()\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = img("").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Img("").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div><script src=\"/resources/wasm_exec.js\"></script> <script>\n\t// This is a polyfill for FireFox and Safari\n\tif (!WebAssembly.instantiateStreaming) {\n\t\tWebAssembly.instantiateStreaming = async (resp, importObject) => {\n\t\t\tconst source = await (await resp).arrayBuffer()\n\t\t\treturn await WebAssembly.instantiate(source, importObject)\n\t\t}\n\t}\n\n\t// Promise to load the wasm file\n\tfunction loadWasm(path) {\n\t\tconst go = new Go()\n\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tWebAssembly.instantiateStreaming(fetch(path), go.importObject)\n\t\t\t\t.then(result => {\n\t\t\t\t\tgo.run(result.instance)\n\t\t\t\t\tresolve(result.instance)\n\t\t\t\t})\n\t\t\t\t.catch(error => {\n\t\t\t\t\treject(error)\n\t\t\t\t})\n\t\t})\n\t}\n\n\t// Load the wasm file\n\tloadWasm(\"/resources/main.wasm\").then(wasm => {\n\t\tconsole.log(\"main.wasm is loaded 👋\")\n\t\tcallGoFunction()\n\t}).catch(error => {\n\t\tconsole.log(\"ouch\", error)\n\t})\n\n\tconst getValue = (id) => document.getElementById(id).value;\n\n\tconst getValues = () => ({\n\t\tbgColor: getValue(\"bg_color\"),\n\t\tfgColor: getValue(\"fg_color\"),\n\t\tsize: getValue(\"size\"),\n\t\ttext: getValue(\"text\"),\n\t})\n\n\tfunction callGoFunction() {\n\t\tconst values = getValues();\n\t\tconsole.log('values', values);\n\n\t\tconst img = document.getElementById(\"img\");\n\t\tconst { imageBase64, err } = imageText(values);\n\t\tif (err) {\n\t\t\tconsole.error(err)\n\t\t} else {\n\t\t\timg.setAttribute(\"src\", \"data:image/png;base64,\" + imageBase64);\n\t\t}\n\t}\n</script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div><script src=\"/resources/wasm_exec.js\"></script> <script>\n\t// This is a polyfill for FireFox and Safari\n\tif (!WebAssembly.instantiateStreaming) {\n\t\tWebAssembly.instantiateStreaming = async (resp, importObject) => {\n\t\t\tconst source = await (await resp).arrayBuffer()\n\t\t\treturn await WebAssembly.instantiate(source, importObject)\n\t\t}\n\t}\n\n\t// Promise to load the wasm file\n\tfunction loadWasm(path) {\n\t\tconst go = new Go()\n\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tWebAssembly.instantiateStreaming(fetch(path), go.importObject)\n\t\t\t\t.then(result => {\n\t\t\t\t\tgo.run(result.instance)\n\t\t\t\t\tresolve(result.instance)\n\t\t\t\t})\n\t\t\t\t.catch(error => {\n\t\t\t\t\treject(error)\n\t\t\t\t})\n\t\t})\n\t}\n\n\t// Load the wasm file\n\tloadWasm(\"/resources/main.wasm\").then(wasm => {\n\t\tconsole.log(\"main.wasm is loaded 👋\")\n\t\tcallGoFunction()\n\t}).catch(error => {\n\t\tconsole.log(\"ouch\", error)\n\t})\n\n\tconst getValue = (id) => document.getElementById(id).value;\n\n\tconst getValues = () => ({\n\t\tbgColor: getValue(\"bg_color\"),\n\t\tfgColor: getValue(\"fg_color\"),\n\t\tsize: getValue(\"size\"),\n\t\ttext: getValue(\"text\"),\n\t})\n\n\tfunction callGoFunction() {\n\t\tconst active = document.activeElement;\n\t\tconst values = getValues();\n\t\tconsole.log('values', values);\n\n\t\tconst img = document.getElementById(\"img\");\n\t\tconst { imageBase64, err } = imageText(values);\n\t\tif (err) {\n\t\t\tconsole.error(err)\n\t\t} else {\n\t\t\timg.setAttribute(\"src\", \"data:image/png;base64,\" + imageBase64);\n\t\t}\n\n\t\tif (active && typeof active.focus === \"function\") {\n\t\t\tactive.focus();\n\t\t}\n\t}\n</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -523,7 +523,7 @@ func OfflinePage(params OfflinePageParams) templ.Component {
 	})
 }
 
-func img(src string) templ.Component {
+func Img(src string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -544,14 +544,14 @@ func img(src string) templ.Component {
 			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-3\"><img id=\"img\" src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"image-result\" class=\"mt-3\"><img id=\"img\" src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(src)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 444, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/templates.templ`, Line: 447, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {

@@ -126,6 +126,10 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	params.Image = u2.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
+	if r.Header.Get("HX-Request") != "" {
+		templ.Handler(templates.Img(params.Image)).ServeHTTP(w, r)
+		return
+	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
 

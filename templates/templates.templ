@@ -225,7 +225,7 @@ templ OnlinePage(params OnlinePageParams) {
 					<a href="/">
 						<h1>image-text</h1>
 					</a>
-					<form method="post" action="/online" hx-post="/online/post" hx-target="body">
+					<form method="post" action="/online" hx-post="/online/post" hx-target="#image-result">
 						<div class="row mb-3">
 							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
 							<div class="col-sm-10">
@@ -286,9 +286,9 @@ templ OnlinePage(params OnlinePageParams) {
 								<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
 							</div>
 						</div>
-						<button type="submit" class="btn btn-primary">Submit</button>
+						<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Submit</button>
 					</form>
-					@img(params.Image)
+					@Img(params.Image)
 				</div>
 			</div>
 		</div>
@@ -305,78 +305,76 @@ templ OfflinePage(params OfflinePageParams) {
 					<a href="/">
 						<h1>image-text</h1>
 					</a>
-					<div class="row mb-3">
-						<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
-						<div class="col-sm-10">
-							<input
-								type="text"
-								class="form-control"
-								id="bg_color"
-								value="steel_blue"
-								name="bg_color"
-								list="bg_color_options"
-								onchange="callGoFunction()"
-							/>
-							<datalist id="bg_color_options">
-								for _, c := range params.ColorOptions {
-									<option value={ c }></option>
-								}
-							</datalist>
+					<form onsubmit="callGoFunction(); return false;">
+						<div class="row mb-3">
+							<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+							<div class="col-sm-10">
+								<input
+									type="text"
+									class="form-control"
+									id="bg_color"
+									value="steel_blue"
+									name="bg_color"
+									list="bg_color_options"
+								/>
+								<datalist id="bg_color_options">
+									for _, c := range params.ColorOptions {
+										<option value={ c }></option>
+									}
+								</datalist>
+							</div>
 						</div>
-					</div>
-					<div class="row mb-3">
-						<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
-						<div class="col-sm-10">
-							<input
-								type="text"
-								class="form-control"
-								id="fg_color"
-								value="yellow"
-								name="fg_color"
-								list="fg_color_options"
-								onchange="callGoFunction()"
-							/>
-							<datalist id="fg_color_options">
-								for _, c := range params.ColorOptions {
-									<option value={ c }></option>
-								}
-							</datalist>
+						<div class="row mb-3">
+							<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+							<div class="col-sm-10">
+								<input
+									type="text"
+									class="form-control"
+									id="fg_color"
+									value="yellow"
+									name="fg_color"
+									list="fg_color_options"
+								/>
+								<datalist id="fg_color_options">
+									for _, c := range params.ColorOptions {
+										<option value={ c }></option>
+									}
+								</datalist>
+							</div>
 						</div>
-					</div>
-					<div class="row mb-3">
-						<label for="size" class="col-sm-2 col-form-label">Size</label>
-						<div class="col-sm-10">
-							<input
-								type="size"
-								class="form-control"
-								id="size"
-								value="vga"
-								name="size"
-								list="size_options"
-								onchange="callGoFunction()"
-							/>
-							<datalist id="size_options">
-								for _, c := range params.SizeOptions {
-									<option value={ c }></option>
-								}
-							</datalist>
+						<div class="row mb-3">
+							<label for="size" class="col-sm-2 col-form-label">Size</label>
+							<div class="col-sm-10">
+								<input
+									type="size"
+									class="form-control"
+									id="size"
+									value="vga"
+									name="size"
+									list="size_options"
+								/>
+								<datalist id="size_options">
+									for _, c := range params.SizeOptions {
+										<option value={ c }></option>
+									}
+								</datalist>
+							</div>
 						</div>
-					</div>
-					<div class="row mb-3">
-						<label for="text" class="col-sm-2 col-form-label">Text</label>
-						<div class="col-sm-10">
-							<input
-								type="text"
-								class="form-control"
-								id="text"
-								value={ params.Text }
-								name="text"
-								onchange="callGoFunction()"
-							/>
+						<div class="row mb-3">
+							<label for="text" class="col-sm-2 col-form-label">Text</label>
+							<div class="col-sm-10">
+								<input
+									type="text"
+									class="form-control"
+									id="text"
+									value={ params.Text }
+									name="text"
+								/>
+							</div>
 						</div>
-					</div>
-					<button type="submit" class="btn btn-primary" disabled>Submit</button>
-					@img("")
+						<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Submit</button>
+					</form>
+					@Img("")
 				</div>
 			</div>
 		</div>
@@ -424,6 +422,7 @@ templ OfflinePage(params OfflinePageParams) {
 	})
 
 	function callGoFunction() {
+		const active = document.activeElement;
 		const values = getValues();
 		console.log('values', values);
 
@@ -434,13 +433,17 @@ templ OfflinePage(params OfflinePageParams) {
 		} else {
 			img.setAttribute("src", "data:image/png;base64," + imageBase64);
 		}
+
+		if (active && typeof active.focus === "function") {
+			active.focus();
+		}
 	}
 </script>
 	}
 }
 
-templ img(src string) {
-	<div class="mt-3">
+templ Img(src string) {
+	<div id="image-result" class="mt-3">
 		<img id="img" src={ src } style="max-width:100%;"/>
 	</div>
 }
