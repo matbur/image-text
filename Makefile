@@ -1,3 +1,7 @@
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z][a-zA-Z0-9_.-]*:([^=]|$$)' $(MAKEFILE_LIST) | cut -d: -f1 | sort -u
+
 start:
 	docker compose up -d --build
 
