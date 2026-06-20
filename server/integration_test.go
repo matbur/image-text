@@ -223,11 +223,13 @@ func TestIntegrationStaticFont(t *testing.T) {
 func TestIntegrationStaticWASM(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/resources/main.wasm", nil)
+	req.Header.Set("Accept-Encoding", "gzip")
 
 	server.NewServer().ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.NotEmpty(t, rr.Body.Bytes())
+	assert.Equal(t, "gzip", rr.Header().Get("Content-Encoding"))
 }
 
 func assertPNGSignature(t *testing.T, data []byte) {

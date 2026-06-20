@@ -35,8 +35,22 @@ func imageText(this js.Value, p []js.Value) any {
 	return map[string]any{"imageBase64": base64.StdEncoding.EncodeToString(buff.Bytes())}
 }
 
+func registerFont(this js.Value, p []js.Value) any {
+	key := p[0].String()
+	length := p[1].Get("length").Int()
+	data := make([]byte, length)
+	js.CopyBytesToGo(data, p[1])
+
+	if err := image.RegisterFont(key, data); err != nil {
+		return map[string]any{"err": err.Error()}
+	}
+
+	return nil
+}
+
 func registerCallbacks() {
 	js.Global().Set("imageText", js.FuncOf(imageText))
+	js.Global().Set("registerFont", js.FuncOf(registerFont))
 }
 
 func main() {

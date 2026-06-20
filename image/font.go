@@ -98,6 +98,43 @@ func KnownFonts() map[string]*truetype.Font {
 	return knownFonts
 }
 
+func KnownFontFilenames() map[string]string {
+	entries, err := resources.Static.ReadDir("fonts")
+	if err != nil {
+		panic(fmt.Errorf("failed to read fonts directory: %w", err))
+	}
+
+	filenames := make(map[string]string)
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(strings.ToLower(entry.Name()), ".ttf") {
+			continue
+		}
+
+		key := fontKey(entry.Name())
+		if _, exists := filenames[key]; exists {
+			panic(fmt.Errorf("duplicate font key %q", key))
+		}
+		filenames[key] = entry.Name()
+	}
+
+	return filenames
+}
+
+func RegisterFont(key string, data []byte) error {
+	key = strings.ToLower(strings.TrimSpace(key))
+	if key == "" {
+		return fmt.Errorf("font name is empty: %w", errorMalformed)
+	}
+
+	fnt, err := truetype.Parse(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse font %q: %w", key, err)
+	}
+
+	knownFonts[key] = fnt
+	return nil
+}
+
 func loadFontFile(filePath string) (*truetype.Font, error) {
 	bb, err := resources.Static.ReadFile(filePath)
 	if err != nil {

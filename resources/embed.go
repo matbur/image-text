@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package resources
 
 import "embed"

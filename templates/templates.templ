@@ -283,9 +283,10 @@ type OnlinePageParams struct {
 	Font    string `json:"font"`
 	Image   string `json:"-"`
 
-	ColorOptions []string `json:"-"`
-	SizeOptions  []string `json:"-"`
-	FontOptions  []string `json:"-"`
+	ColorOptions []string          `json:"-"`
+	SizeOptions  []string          `json:"-"`
+	FontOptions  []string          `json:"-"`
+	FontFiles    map[string]string `json:"-"`
 }
 
 templ pageHeader(label string, badgeClass string, description string) {
@@ -507,6 +508,7 @@ templ OfflinePage(params OfflinePageParams) {
 				</div>
 			</div>
 		</div>
+		@templ.JSONScript("font-files-data", params.FontFiles)
 		<script src="/resources/wasm_exec.js"></script>
 		<script>
 	// This is a polyfill for FireFox and Safari
@@ -515,6 +517,34 @@ templ OfflinePage(params OfflinePageParams) {
 			const source = await (await resp).arrayBuffer()
 			return await WebAssembly.instantiate(source, importObject)
 		}
+	}
+
+	const fontFiles = JSON.parse(document.getElementById("font-files-data").textContent);
+	const loadedFonts = new Set(["ubuntu_mono"]);
+
+	async function ensureFont(key) {
+		if (loadedFonts.has(key)) {
+			return null;
+		}
+
+		const filename = fontFiles[key];
+		if (!filename) {
+			return `font '${key}' is not available`;
+		}
+
+		const resp = await fetch("/resources/fonts/" + encodeURIComponent(filename));
+		if (!resp.ok) {
+			return `failed to load font '${key}'`;
+		}
+
+		const bytes = new Uint8Array(await resp.arrayBuffer());
+		const result = registerFont(key, bytes);
+		if (result && result.err) {
+			return result.err;
+		}
+
+		loadedFonts.add(key);
+		return null;
 	}
 
 	// Promise to load the wasm file
@@ -551,10 +581,16 @@ templ OfflinePage(params OfflinePageParams) {
 		text: getValue("text"),
 	})
 
-	function callGoFunction() {
+	async function callGoFunction() {
 		const active = document.activeElement;
 		const values = getValues();
 		console.log('values', values);
+
+		const fontErr = await ensureFont(values.font);
+		if (fontErr) {
+			console.error(fontErr);
+			return;
+		}
 
 		const img = document.getElementById("img");
 		const { imageBase64, err } = imageText(values);

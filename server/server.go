@@ -27,6 +27,7 @@ func NewServer() chi.Router {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
 
 	r.Get("/", handleMain)
 	r.Get("/online", handleOnlinePage)
@@ -48,6 +49,7 @@ func handleStatic(w http.ResponseWriter, r *http.Request) {
 	fn := r.PathValue("filename")
 	if fn == "main.wasm" {
 		slog.Info("main.wasm")
+		w.Header().Set("Content-Type", "application/wasm")
 		w.Write(wasm.Main)
 		return
 	}
@@ -56,7 +58,14 @@ func handleStatic(w http.ResponseWriter, r *http.Request) {
 
 func handleFontStatic(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Expires", time.Now().Add(24*time.Hour).Format(http.TimeFormat))
-	http.ServeFileFS(w, r, resources.Static, path.Join("fonts", r.PathValue("filename")))
+
+	filename, err := url.PathUnescape(r.PathValue("filename"))
+	if err != nil {
+		writeJSON(w, "malformed font path", http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFileFS(w, r, resources.Static, path.Join("fonts", filename))
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
@@ -263,6 +272,7 @@ func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
 		FontOptions:  pie.Keys(image.KnownFonts()),
+		FontFiles:    image.KnownFontFilenames(),
 	}
 	templ.Handler(templates.OfflinePage(params)).ServeHTTP(w, r)
 }
