@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
 
 	"github.com/a-h/templ"
@@ -33,6 +34,7 @@ func NewServer() chi.Router {
 	r.Get("/favicon.ico", handleFavicon)
 	r.Get("/docs", handleDocs)
 	r.Get("/resources/{filename}", handleStatic)
+	r.Get("/resources/fonts/{filename}", handleFontStatic)
 	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
 
 	return r
@@ -48,6 +50,11 @@ func handleStatic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.ServeFileFS(w, r, resources.Static, fn)
+}
+
+func handleFontStatic(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Expires", time.Now().Add(24*time.Hour).Format(http.TimeFormat))
+	http.ServeFileFS(w, r, resources.Static, path.Join("fonts", r.PathValue("filename")))
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {

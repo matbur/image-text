@@ -20,9 +20,18 @@ templ head() {
 			crossorigin="anonymous"
 		/>
 		<style>
+		@font-face {
+			font-family: "Roboto";
+			src: url("/resources/fonts/Roboto-VariableFont_wdth%2Cwght.ttf") format("truetype");
+			font-weight: 100 900;
+			font-style: normal;
+			font-display: swap;
+		}
+
 		html,
 		body {
 			height: 100%;
+			font-family: "Roboto", sans-serif;
 		}
 
 		.centered-container {
@@ -175,13 +184,13 @@ templ IndexPage(params IndexPageParams) {
 		@githubCorner()
 		<div class="container centered-container d-flex justify-content-center align-items-center">
 			<div class="row" hx-boost="false">
-				<a href="/">
+				<a href="/" class="text-decoration-none text-body-emphasis">
 					<h1>image-text</h1>
 				</a>
-				<a href="/docs">docs</a>
+				<a href="/docs" class="text-decoration-none text-body-emphasis">docs</a>
 				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
-						<a href="/online">
+						<a href="/online" class="text-decoration-none">
 							<img src="/resources/htmx.png" class="card-img-top"/>
 						</a>
 						<div class="card-body">
@@ -192,7 +201,7 @@ templ IndexPage(params IndexPageParams) {
 				</div>
 				<div class="col-md-6">
 					<div class="card mb-4" style="width: 18rem;">
-						<a href="/offline">
+						<a href="/offline" class="text-decoration-none">
 							<img src="/resources/wasm.png" class="card-img-top"/>
 						</a>
 						<div class="card-body">
@@ -220,7 +229,7 @@ type OnlinePageParams struct {
 }
 
 templ pageTitle(label string) {
-	<a href="/">
+	<a href="/" class="text-decoration-none text-body-emphasis">
 		<h1>image-text <span class="badge bg-secondary ms-2 align-middle fs-6 fw-normal">{ label }</span></h1>
 	</a>
 }
