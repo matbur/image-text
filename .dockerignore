@@ -1,5 +1,6 @@
 *
 !cmd/
+!i18n/
 !image/
 !pkg/
 !resources/
