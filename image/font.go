@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/golang/freetype/truetype"
@@ -96,6 +97,15 @@ func NewFontFromString(s string) (*truetype.Font, error) {
 
 func KnownFonts() map[string]*truetype.Font {
 	return knownFonts
+}
+
+func KnownFontNames() []string {
+	names := make([]string, 0, len(knownFonts))
+	for name := range knownFonts {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func KnownFontFilenames() map[string]string {

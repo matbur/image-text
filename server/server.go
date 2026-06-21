@@ -116,7 +116,7 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 		Image:        u.String(),
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
-		FontOptions:  pie.Keys(image.KnownFonts()),
+		FontOptions:  image.KnownFontNames(),
 		I18n:         locale,
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
@@ -168,7 +168,7 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	params.Image = u2.String()
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
-	params.FontOptions = pie.Keys(image.KnownFonts())
+	params.FontOptions = image.KnownFontNames()
 	if r.Header.Get("HX-Request") != "" {
 		templ.Handler(templates.Img(locale, params.Image)).ServeHTTP(w, r)
 		return
@@ -232,7 +232,7 @@ var docs = struct {
 	},
 	Colors: image.KnownColorStrings(),
 	Sizes:  image.KnownSizeStrings(),
-	Fonts:  pie.Keys(image.KnownFonts()),
+	Fonts:  image.KnownFontNames(),
 }
 
 func docsParams(locale i18n.Locale) map[string]string {
@@ -275,7 +275,6 @@ func handleDocsPage(w http.ResponseWriter, r *http.Request) {
 		Fonts:        docs.Fonts,
 		I18n:         locale,
 	}
-	sort.Strings(params.Fonts)
 	templ.Handler(templates.DocsPage(params)).ServeHTTP(w, r)
 }
 
@@ -315,7 +314,7 @@ func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
 		Font:         "ubuntu_mono",
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
-		FontOptions:  pie.Keys(image.KnownFonts()),
+		FontOptions:  image.KnownFontNames(),
 		FontFiles:    image.KnownFontFilenames(),
 		I18n:         locale,
 	}
