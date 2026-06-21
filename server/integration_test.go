@@ -43,6 +43,20 @@ func newOnlinePostRequest(t *testing.T, htmx bool) *http.Request {
 	return req
 }
 
+func TestIntegrationIndexPagePolish(t *testing.T) {
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "lang", Value: "pl"})
+
+	server.NewServer().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	body := rr.Body.String()
+	assert.Contains(t, body, "Wypróbuj online")
+	assert.Contains(t, body, "Dokumentacja API")
+	assert.Contains(t, body, `lang="pl"`)
+}
+
 func TestIntegrationIndexPage(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

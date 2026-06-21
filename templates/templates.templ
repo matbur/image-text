@@ -1,16 +1,30 @@
 package templates
 
-templ head() {
+import "github.com/matbur/image-text/i18n"
+
+templ head(locale i18n.Locale) {
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<title>image-text</title>
+		<title>{ locale.T("meta.title") }</title>
 		<link rel="icon" href="/resources/favicon.png"/>
 		<script>
 		(function () {
-			var stored = localStorage.getItem("theme");
-			var theme = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+			var storedTheme = localStorage.getItem("theme");
+			var theme = storedTheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 			document.documentElement.setAttribute("data-bs-theme", theme);
+
+			var cookieMatch = document.cookie.match(/(?:^|;\s*)lang=([^;]+)/);
+			var cookieLang = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+			var storedLang = localStorage.getItem("lang");
+			if (storedLang && storedLang !== cookieLang) {
+				document.cookie = "lang=" + encodeURIComponent(storedLang) + ";path=/;max-age=31536000;samesite=lax";
+				if (!cookieLang) {
+					location.reload();
+				}
+			} else if (cookieLang && !storedLang) {
+				localStorage.setItem("lang", cookieLang);
+			}
 		})();
 	</script>
 		<link
@@ -38,11 +52,36 @@ templ head() {
 			min-height: 0;
 		}
 
-		.theme-toggle-btn {
+		.theme-toggle-btn,
+		.language-switcher {
 			position: fixed;
 			top: 0.75rem;
-			left: 0.75rem;
 			z-index: 1030;
+		}
+
+		.theme-toggle-btn {
+			left: 0.75rem;
+		}
+
+		.language-switcher {
+			left: 3.5rem;
+		}
+
+		.language-switcher .dropdown-toggle {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.375rem;
+		}
+
+		.language-switcher .lang-flag {
+			font-size: 1.125rem;
+			line-height: 1;
+		}
+
+		.language-switcher .dropdown-item {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
 		}
 
 		.theme-toggle-btn .theme-icon-dark {
@@ -111,21 +150,21 @@ templ head() {
 	</head>
 }
 
-templ buildVersionFooter(commitSHA string) {
+templ buildVersionFooter(locale i18n.Locale, commitSHA string) {
 	if commitSHA != "" {
 		<footer class="build-version-footer text-center small text-body-secondary py-3 border-top">
-			<span>Build version</span>
+			<span>{ locale.T("footer.build_version") }</span>
 			<a href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) } class="text-decoration-none link-secondary font-monospace ms-1">{ commitSHA }</a>
 		</footer>
 	}
 }
 
-templ themeToggle() {
+templ themeToggle(locale i18n.Locale) {
 	<button
 		id="theme-toggle"
 		class="btn btn-outline-secondary btn-sm theme-toggle-btn"
 		type="button"
-		aria-label="Toggle dark mode"
+		aria-label={ locale.T("meta.toggle_theme") }
 		onclick="toggleTheme()"
 	>
 		<span class="theme-icon-light" aria-hidden="true">☀</span>
@@ -133,8 +172,40 @@ templ themeToggle() {
 	</button>
 }
 
-templ githubCorner() {
-	<a href="https://github.com/matbur/image-text" class="github-corner" aria-label="View source on GitHub">
+templ languageSwitcher(locale i18n.Locale) {
+	<div class="dropdown language-switcher">
+		<button
+			class="btn btn-outline-secondary btn-sm dropdown-toggle"
+			type="button"
+			data-bs-toggle="dropdown"
+			aria-expanded="false"
+			aria-label={ locale.T("lang.switch") }
+		>
+			<span class="lang-flag" aria-hidden="true">{ locale.Flag() }</span>
+			<span>{ i18n.NativeLabel(locale.Tag) }</span>
+		</button>
+		<ul class="dropdown-menu">
+			for _, tag := range i18n.Supported {
+				<li>
+					if tag == locale.Tag {
+						<button type="button" class="dropdown-item active" aria-current="true" disabled>
+							<span class="lang-flag" aria-hidden="true">{ i18n.Flag(tag) }</span>
+							<span>{ i18n.NativeLabel(tag) }</span>
+						</button>
+					} else {
+						<button type="button" class="dropdown-item" data-lang={ tag } onclick="setLanguage(this.dataset.lang)">
+							<span class="lang-flag" aria-hidden="true">{ i18n.Flag(tag) }</span>
+							<span>{ i18n.NativeLabel(tag) }</span>
+						</button>
+					}
+				</li>
+			}
+		</ul>
+	</div>
+}
+
+templ githubCorner(locale i18n.Locale) {
+	<a href="https://github.com/matbur/image-text" class="github-corner" aria-label={ locale.T("meta.github") }>
 		<svg
 			width="80"
 			height="80"
@@ -191,12 +262,13 @@ templ githubCorner() {
 </style>
 }
 
-templ layout() {
+templ layout(locale i18n.Locale) {
 	<!DOCTYPE html>
-	<html lang="en">
-		@head()
+	<html lang={ locale.Tag } data-error-not-found={ locale.T("meta.error_not_found") }>
+		@head(locale)
 		<body hx-boost="true">
-			@themeToggle()
+			@themeToggle(locale)
+			@languageSwitcher(locale)
 			{ children... }
 			<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 			<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
@@ -207,7 +279,7 @@ templ layout() {
 			if (evt.detail.xhr.status === 404) {
 				// alert the user when a 404 occurs (maybe use a nicer mechanism than alert())
 				console.error("Couldn't find: ", evt.detail.xhr)
-				alert("Error: Could Not Find Resource");
+				alert(document.documentElement.getAttribute("data-error-not-found"));
 			} else if (evt.detail.xhr.status === 422) {
 				// allow 422 responses to swap as we are using this as a signal that
 				// a form was submitted with bad data and want to rerender with the
@@ -231,6 +303,12 @@ templ layout() {
 			html.setAttribute("data-bs-theme", next);
 			localStorage.setItem("theme", next);
 		}
+
+		function setLanguage(lang) {
+			localStorage.setItem("lang", lang);
+			document.cookie = "lang=" + encodeURIComponent(lang) + ";path=/;max-age=31536000;samesite=lax";
+			location.reload();
+		}
 	</script>
 		</body>
 	</html>
@@ -238,17 +316,18 @@ templ layout() {
 
 type IndexPageParams struct {
 	CommitSHA string
+	I18n      i18n.Locale
 }
 
 templ IndexPage(params IndexPageParams) {
-	@layout() {
-		@githubCorner()
+	@layout(params.I18n) {
+		@githubCorner(params.I18n)
 		<div class="d-flex flex-column min-vh-100">
 			<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4 flex-grow-1">
 				<header class="index-hero text-center mb-5">
-					<h1 class="display-4 fw-bold mb-2">image-text</h1>
-					<p class="lead text-body-secondary mb-3">Generate placeholder images with custom text, colors, sizes, and fonts.</p>
-					<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
+					<h1 class="display-4 fw-bold mb-2">{ params.I18n.T("meta.title") }</h1>
+					<p class="lead text-body-secondary mb-3">{ params.I18n.T("index.lead") }</p>
+					<a href="/docs" class="text-decoration-none link-secondary">📄 { params.I18n.T("index.api_docs") }</a>
 				</header>
 				<div class="row g-4 justify-content-center w-100" style="max-width: 44rem;" hx-boost="false">
 					<div class="col-sm-6">
@@ -258,11 +337,11 @@ templ IndexPage(params IndexPageParams) {
 							</div>
 							<div class="card-body d-flex flex-column">
 								<div class="d-flex align-items-center gap-2 mb-2">
-									<h2 class="h5 card-title mb-0">Online</h2>
-									<span class="badge text-bg-primary">server</span>
+									<h2 class="h5 card-title mb-0">{ params.I18n.T("index.online.title") }</h2>
+									<span class="badge text-bg-primary">{ params.I18n.T("index.online.badge") }</span>
 								</div>
-								<p class="card-text text-body-secondary flex-grow-1">Render images on the backend with HTMX-powered forms.</p>
-								<a href="/online" class="btn btn-primary mt-2">Try online</a>
+								<p class="card-text text-body-secondary flex-grow-1">{ params.I18n.T("index.online.description") }</p>
+								<a href="/online" class="btn btn-primary mt-2">{ params.I18n.T("index.online.cta") }</a>
 							</div>
 						</div>
 					</div>
@@ -273,17 +352,17 @@ templ IndexPage(params IndexPageParams) {
 							</div>
 							<div class="card-body d-flex flex-column">
 								<div class="d-flex align-items-center gap-2 mb-2">
-									<h2 class="h5 card-title mb-0">Offline</h2>
-									<span class="badge text-bg-secondary">browser</span>
+									<h2 class="h5 card-title mb-0">{ params.I18n.T("index.offline.title") }</h2>
+									<span class="badge text-bg-secondary">{ params.I18n.T("index.offline.badge") }</span>
 								</div>
-								<p class="card-text text-body-secondary flex-grow-1">Render images locally in your browser using WebAssembly.</p>
-								<a href="/offline" class="btn btn-outline-primary mt-2">Try offline</a>
+								<p class="card-text text-body-secondary flex-grow-1">{ params.I18n.T("index.offline.description") }</p>
+								<a href="/offline" class="btn btn-outline-primary mt-2">{ params.I18n.T("index.offline.cta") }</a>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			@buildVersionFooter(params.CommitSHA)
+			@buildVersionFooter(params.I18n, params.CommitSHA)
 		</div>
 	}
 }
@@ -300,17 +379,18 @@ type OnlinePageParams struct {
 	SizeOptions  []string          `json:"-"`
 	FontOptions  []string          `json:"-"`
 	FontFiles    map[string]string `json:"-"`
+	I18n         i18n.Locale       `json:"-"`
 }
 
-templ pageHeader(label string, badgeClass string, description string) {
+templ pageHeader(locale i18n.Locale, labelKey string, badgeClass string, descriptionKey string) {
 	<header class="page-hero mb-4">
 		<a href="/" class="text-decoration-none text-body-emphasis">
 			<h1 class="display-5 fw-bold mb-2">
-				image-text <span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>{ label }</span>
+				{ locale.T("meta.title") } <span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>{ locale.T(labelKey) }</span>
 			</h1>
 		</a>
-		<p class="text-body-secondary mb-2">{ description }</p>
-		<a href="/docs" class="text-decoration-none link-secondary">📄 API docs</a>
+		<p class="text-body-secondary mb-2">{ locale.T(descriptionKey) }</p>
+		<a href="/docs" class="text-decoration-none link-secondary">📄 { locale.T("common.api_docs") }</a>
 	</header>
 }
 
@@ -325,17 +405,17 @@ templ fontOptions(selected string, options []string) {
 }
 
 templ OnlinePage(params OnlinePageParams) {
-	@layout() {
+	@layout(params.I18n) {
 		<div class="container py-4 py-lg-5" style="max-width: 52rem;">
-			@pageHeader("online", "text-bg-primary", "Render images on the backend with HTMX-powered forms.")
+			@pageHeader(params.I18n, "online.badge", "text-bg-primary", "online.description")
 			<div class="row g-4">
 				<div class="col-lg-7">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Settings</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.settings") }</h2>
 							<form method="post" action="/online" hx-ext="json-enc" hx-post="/online/post" hx-target="#image-result">
 								<div class="row mb-3">
-									<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+									<label for="bg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.bg_color") }</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -353,7 +433,7 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+									<label for="fg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.text_color") }</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -371,7 +451,7 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="size" class="col-sm-2 col-form-label">Size</label>
+									<label for="size" class="col-sm-2 col-form-label">{ params.I18n.T("common.size") }</label>
 									<div class="col-sm-10">
 										<input
 											type="size"
@@ -389,7 +469,7 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="font" class="col-sm-2 col-form-label">Font</label>
+									<label for="font" class="col-sm-2 col-form-label">{ params.I18n.T("common.font") }</label>
 									<div class="col-sm-10">
 										<select class="form-select" id="font" name="font" onchange="this.form.requestSubmit()">
 											@fontOptions(params.Font, params.FontOptions)
@@ -397,12 +477,12 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="text" class="col-sm-2 col-form-label">Text</label>
+									<label for="text" class="col-sm-2 col-form-label">{ params.I18n.T("common.text") }</label>
 									<div class="col-sm-10">
 										<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
 									</div>
 								</div>
-								<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">Generate image</button>
+								<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">{ params.I18n.T("common.generate") }</button>
 							</form>
 						</div>
 					</div>
@@ -410,8 +490,8 @@ templ OnlinePage(params OnlinePageParams) {
 				<div class="col-lg-5">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Preview</h2>
-							@Img(params.Image)
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.preview") }</h2>
+							@Img(params.I18n, params.Image)
 						</div>
 					</div>
 				</div>
@@ -423,17 +503,17 @@ templ OnlinePage(params OnlinePageParams) {
 type OfflinePageParams OnlinePageParams
 
 templ OfflinePage(params OfflinePageParams) {
-	@layout() {
+	@layout(params.I18n) {
 		<div class="container py-4 py-lg-5" style="max-width: 52rem;" hx-boost="false">
-			@pageHeader("offline", "text-bg-secondary", "Render images locally in your browser using WebAssembly.")
+			@pageHeader(params.I18n, "offline.badge", "text-bg-secondary", "offline.description")
 			<div class="row g-4">
 				<div class="col-lg-7">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Settings</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.settings") }</h2>
 							<form onsubmit="callGoFunction(); return false;">
 								<div class="row mb-3">
-									<label for="bg_color" class="col-sm-2 col-form-label">Background color</label>
+									<label for="bg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.bg_color") }</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -451,7 +531,7 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="fg_color" class="col-sm-2 col-form-label">Text color</label>
+									<label for="fg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.text_color") }</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -469,7 +549,7 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="size" class="col-sm-2 col-form-label">Size</label>
+									<label for="size" class="col-sm-2 col-form-label">{ params.I18n.T("common.size") }</label>
 									<div class="col-sm-10">
 										<input
 											type="size"
@@ -487,7 +567,7 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="font" class="col-sm-2 col-form-label">Font</label>
+									<label for="font" class="col-sm-2 col-form-label">{ params.I18n.T("common.font") }</label>
 									<div class="col-sm-10">
 										<select class="form-select" id="font" name="font" onchange="callGoFunction()">
 											@fontOptions(params.Font, params.FontOptions)
@@ -495,7 +575,7 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="text" class="col-sm-2 col-form-label">Text</label>
+									<label for="text" class="col-sm-2 col-form-label">{ params.I18n.T("common.text") }</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -506,7 +586,7 @@ templ OfflinePage(params OfflinePageParams) {
 										/>
 									</div>
 								</div>
-								<button type="submit" class="btn btn-outline-primary" onmousedown="event.preventDefault()">Generate image</button>
+								<button type="submit" class="btn btn-outline-primary" onmousedown="event.preventDefault()">{ params.I18n.T("common.generate") }</button>
 							</form>
 						</div>
 					</div>
@@ -514,8 +594,8 @@ templ OfflinePage(params OfflinePageParams) {
 				<div class="col-lg-5">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Preview</h2>
-							@Img("")
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.preview") }</h2>
+							@Img(params.I18n, "")
 						</div>
 					</div>
 				</div>
@@ -621,9 +701,9 @@ templ OfflinePage(params OfflinePageParams) {
 	}
 }
 
-templ Img(src string) {
+templ Img(locale i18n.Locale, src string) {
 	<div id="image-result" class="page-preview text-center">
-		<img id="img" src={ src } class="img-fluid rounded" alt="Generated preview"/>
+		<img id="img" src={ src } class="img-fluid rounded" alt={ locale.T("common.preview_alt") }/>
 	</div>
 }
 
@@ -639,27 +719,28 @@ type DocsPageParams struct {
 	ColorEntries []DocsEntry
 	SizeEntries  []DocsEntry
 	Fonts        []string
+	I18n         i18n.Locale
 }
 
 templ DocsPage(params DocsPageParams) {
-	@layout() {
+	@layout(params.I18n) {
 		<div class="container py-4 py-lg-5" style="max-width: 52rem;">
 			<header class="page-hero mb-4">
 				<a href="/" class="text-decoration-none text-body-emphasis">
-					<h1 class="display-5 fw-bold mb-2">image-text</h1>
+					<h1 class="display-5 fw-bold mb-2">{ params.I18n.T("meta.title") }</h1>
 				</a>
-				<p class="lead text-body-secondary mb-2">API documentation</p>
-				<a href="/docs.json" class="text-decoration-none link-secondary">JSON version</a>
+				<p class="lead text-body-secondary mb-2">{ params.I18n.T("docs.title") }</p>
+				<a href="/docs.json" class="text-decoration-none link-secondary">{ params.I18n.T("docs.json_version") }</a>
 			</header>
 			<div class="card shadow-sm border-0 mb-4">
 				<div class="card-body">
-					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">URL pattern</h2>
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.url_pattern") }</h2>
 					<pre class="docs-code mb-0">{ params.Path }</pre>
 				</div>
 			</div>
 			<div class="card shadow-sm border-0 mb-4">
 				<div class="card-body">
-					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Query parameters</h2>
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.query_params") }</h2>
 					<dl class="row mb-0">
 						for name, value := range params.Params {
 							<dt class="col-sm-3">{ name }</dt>
@@ -670,7 +751,7 @@ templ DocsPage(params DocsPageParams) {
 			</div>
 			<div class="card shadow-sm border-0 mb-4">
 				<div class="card-body">
-					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Examples</h2>
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.examples") }</h2>
 					for name, value := range params.Examples {
 						<p class="fw-semibold mb-1">{ name }</p>
 						<pre class="docs-code">{ value }</pre>
@@ -681,7 +762,7 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Colors</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.colors") }</h2>
 							<div class="docs-scroll">
 								<dl class="row mb-0 small">
 									for _, entry := range params.ColorEntries {
@@ -696,7 +777,7 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Sizes</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.sizes") }</h2>
 							<div class="docs-scroll">
 								<dl class="row mb-0 small">
 									for _, entry := range params.SizeEntries {
@@ -711,7 +792,7 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">Fonts</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.fonts") }</h2>
 							<div class="docs-scroll">
 								<ul class="list-unstyled small mb-0">
 									for _, font := range params.Fonts {

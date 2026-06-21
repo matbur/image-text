@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/matbur/image-text/i18n"
 	"github.com/matbur/image-text/image"
 	"github.com/matbur/image-text/resources"
 	"github.com/matbur/image-text/templates"
@@ -70,12 +71,15 @@ func handleFontStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleMain(w http.ResponseWriter, r *http.Request) {
+	locale := i18n.FromRequest(r)
 	templ.Handler(templates.IndexPage(templates.IndexPageParams{
 		CommitSHA: version.Commit,
+		I18n:      locale,
 	})).ServeHTTP(w, r)
 }
 
 func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
+	locale := i18n.FromRequest(r)
 	q := r.URL.Query()
 	text := q.Get("text")
 	bgColor := q.Get("bg_color")
@@ -113,16 +117,19 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
 		FontOptions:  pie.Keys(image.KnownFonts()),
+		I18n:         locale,
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
 
 func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
+	locale := i18n.FromRequest(r)
 	var params templates.OnlinePageParams
 
 	bb, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Error("Failed to read body", "err", err)
+		params.I18n = locale
 		templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 		return
 	}
@@ -133,9 +140,12 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.Unmarshal(bb, &params); err != nil {
 		slog.Error("Failed to unmarshal body", "err", err)
+		params.I18n = locale
 		templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 		return
 	}
+
+	params.I18n = locale
 
 	q := url.Values{}
 	q.Set("text", params.Text)
@@ -160,7 +170,7 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	params.SizeOptions = pie.Keys(image.KnownSizes())
 	params.FontOptions = pie.Keys(image.KnownFonts())
 	if r.Header.Get("HX-Request") != "" {
-		templ.Handler(templates.Img(params.Image)).ServeHTTP(w, r)
+		templ.Handler(templates.Img(locale, params.Image)).ServeHTTP(w, r)
 		return
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
@@ -216,10 +226,6 @@ var docs = struct {
 	Fonts    []string          `json:"fonts"`
 }{
 	Path: "HOST/size/background/foreground?text=rendered+text&font=ubuntu_mono",
-	Params: map[string]string{
-		"text": "rendered text (optional, defaults to size)",
-		"font": "font name (optional, defaults to ubuntu_mono)",
-	},
 	Examples: map[string]string{
 		"with_names": "/hd720/steel_blue/yellow?text=rendered+text&font=ubuntu_mono",
 		"with_codes": "/320x200/000/FFFF00?font=open_sans",
@@ -227,6 +233,21 @@ var docs = struct {
 	Colors: image.KnownColorStrings(),
 	Sizes:  image.KnownSizeStrings(),
 	Fonts:  pie.Keys(image.KnownFonts()),
+}
+
+func docsParams(locale i18n.Locale) map[string]string {
+	return map[string]string{
+		"text": locale.T("docs.param.text"),
+		"font": locale.T("docs.param.font"),
+	}
+}
+
+func docsExamples(locale i18n.Locale) map[string]string {
+	examples := make(map[string]string, len(docs.Examples))
+	for key, value := range docs.Examples {
+		examples[locale.T("docs.example."+key)] = value
+	}
+	return examples
 }
 
 func docsEntries(values map[string]string) []templates.DocsEntry {
@@ -244,20 +265,39 @@ func docsEntries(values map[string]string) []templates.DocsEntry {
 }
 
 func handleDocsPage(w http.ResponseWriter, r *http.Request) {
+	locale := i18n.FromRequest(r)
 	params := templates.DocsPageParams{
 		Path:         docs.Path,
-		Params:       docs.Params,
-		Examples:     docs.Examples,
+		Params:       docsParams(locale),
+		Examples:     docsExamples(locale),
 		ColorEntries: docsEntries(docs.Colors),
 		SizeEntries:  docsEntries(docs.Sizes),
 		Fonts:        docs.Fonts,
+		I18n:         locale,
 	}
 	sort.Strings(params.Fonts)
 	templ.Handler(templates.DocsPage(params)).ServeHTTP(w, r)
 }
 
 func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
-	js, err := json.Marshal(docs)
+	locale := i18n.FromRequest(r)
+	payload := struct {
+		Path     string            `json:"path"`
+		Params   map[string]string `json:"params"`
+		Examples map[string]string `json:"example"`
+		Colors   map[string]string `json:"colors"`
+		Sizes    map[string]string `json:"sizes"`
+		Fonts    []string          `json:"fonts"`
+	}{
+		Path:     docs.Path,
+		Params:   docsParams(locale),
+		Examples: docsExamples(locale),
+		Colors:   docs.Colors,
+		Sizes:    docs.Sizes,
+		Fonts:    docs.Fonts,
+	}
+
+	js, err := json.Marshal(payload)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)
 		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
@@ -270,12 +310,14 @@ func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
+	locale := i18n.FromRequest(r)
 	params := templates.OfflinePageParams{
 		Font:         "ubuntu_mono",
 		ColorOptions: pie.Keys(image.KnownColors()),
 		SizeOptions:  pie.Keys(image.KnownSizes()),
 		FontOptions:  pie.Keys(image.KnownFonts()),
 		FontFiles:    image.KnownFontFilenames(),
+		I18n:         locale,
 	}
 	templ.Handler(templates.OfflinePage(params)).ServeHTTP(w, r)
 }
