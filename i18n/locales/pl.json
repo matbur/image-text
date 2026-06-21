@@ -8,7 +8,7 @@
   "lang.pl": "Polski",
   "lang.es": "Hiszpański",
   "lang.switch": "Język",
-  "index.lead": "Generuj obrazy zastępcze z własnym tekstem, kolorami, rozmiarami i czcionkami.",
+  "index.lead": "Generuj obrazy zastępcze z własnym tekstem, kolorami, rozmiarami i fontami.",
   "index.api_docs": "Dokumentacja API",
   "index.online.title": "Online",
   "index.online.badge": "serwer",
@@ -28,7 +28,7 @@
   "common.bg_color": "Kolor tła",
   "common.text_color": "Kolor tekstu",
   "common.size": "Rozmiar",
-  "common.font": "Czcionka",
+  "common.font": "Font",
   "common.text": "Tekst",
   "common.generate": "Generuj obraz",
   "common.preview_alt": "Wygenerowany podgląd",
@@ -39,9 +39,9 @@
   "docs.examples": "Przykłady",
   "docs.colors": "Kolory",
   "docs.sizes": "Rozmiary",
-  "docs.fonts": "Czcionki",
+  "docs.fonts": "Fonty",
   "docs.example.with_names": "z_nazwami",
   "docs.example.with_codes": "z_kodami",
   "docs.param.text": "renderowany tekst (opcjonalnie, domyślnie rozmiar)",
-  "docs.param.font": "nazwa czcionki (opcjonalnie, domyślnie ubuntu_mono)"
+  "docs.param.font": "font (opcjonalnie, domyślnie ubuntu_mono)"
 }
