@@ -1,8 +1,10 @@
 package server
 
 import (
+	"bytes"
 	"cmp"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -16,6 +18,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
+	lru "github.com/hashicorp/golang-lru/v2"
 
 	"github.com/matbur/image-text/i18n"
 	"github.com/matbur/image-text/image"
@@ -28,6 +31,7 @@ import (
 type Config struct {
 	RateLimitRequests int
 	RateLimitWindow   time.Duration
+	CacheSize         int
 }
 
 func NewServer(cfg Config) chi.Router {
@@ -40,6 +44,8 @@ func NewServer(cfg Config) chi.Router {
 		r.Use(httprate.LimitByIP(cfg.RateLimitRequests, cfg.RateLimitWindow))
 	}
 
+	cache := imageCache(cfg)
+
 	r.Get("/healthz", handleHealthz)
 	r.Get("/readyz", handleReadyz)
 	r.Get("/", handleMain)
@@ -51,9 +57,81 @@ func NewServer(cfg Config) chi.Router {
 	r.Get("/docs.json", handleDocsJSON)
 	r.Get("/resources/{filename}", handleStatic)
 	r.Get("/resources/fonts/{filename}", handleFontStatic)
-	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
+	r.Get("/{size}/{bg_color}/{fg_color}", cachedHandleImage(cache))
 
 	return r
+}
+
+func imageCache(cfg Config) *lru.Cache[string, []byte] {
+	if cfg.CacheSize <= 0 {
+		return nil
+	}
+	c, err := lru.New[string, []byte](cfg.CacheSize)
+	if err != nil {
+		slog.Warn("Failed to create image cache", "err", err)
+		return nil
+	}
+	return c
+}
+
+func cacheKey(size, bgColor, fgColor, text, font string) string {
+	return fmt.Sprintf("%s/%s/%s?text=%s&font=%s", size, bgColor, fgColor, text, font)
+}
+
+func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		begin := time.Now()
+
+		size := chi.URLParam(r, "size")
+		bgColor := chi.URLParam(r, "bg_color")
+		fgColor := chi.URLParam(r, "fg_color")
+		text := r.URL.Query().Get("text")
+		font := r.URL.Query().Get("font")
+
+		key := cacheKey(size, bgColor, fgColor, text, font)
+
+		if cache != nil {
+			if bb, ok := cache.Get(key); ok {
+				w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
+				w.Write(bb)
+				slog.With(
+					"response", "binary",
+					"cache", "hit",
+					"duration", time.Since(begin).String(),
+					"status", http.StatusOK,
+				).Info("Response")
+				return
+			}
+		}
+
+		w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
+
+		img, err := image.New(size, bgColor, fgColor, text, font)
+		if err != nil {
+			writeJSON(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var buf bytes.Buffer
+		if err := img.Draw(&buf); err != nil {
+			writeJSON(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		bb := buf.Bytes()
+
+		if cache != nil {
+			cache.Add(key, bb)
+		}
+
+		w.Write(bb)
+
+		slog.With(
+			"response", "binary",
+			"duration", time.Since(begin).String(),
+			"status", http.StatusOK,
+		).Info("Response")
+	}
 }
 
 func handleHealthz(w http.ResponseWriter, r *http.Request) {
@@ -197,34 +275,6 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
-}
-
-func handleImage(w http.ResponseWriter, r *http.Request) {
-	begin := time.Now()
-
-	size := chi.URLParam(r, "size")
-	bgColor := chi.URLParam(r, "bg_color")
-	fgColor := chi.URLParam(r, "fg_color")
-	text := r.URL.Query().Get("text")
-	font := r.URL.Query().Get("font")
-
-	w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
-
-	img, err := image.New(size, bgColor, fgColor, text, font)
-	if err != nil {
-		writeJSON(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if err := img.Draw(w); err != nil {
-		writeJSON(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	slog.With(
-		"response", "binary",
-		"duration", time.Since(begin).String(),
-		"status", http.StatusOK,
-	).Info("Response")
 }
 
 func handleFavicon(w http.ResponseWriter, r *http.Request) {

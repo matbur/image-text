@@ -23,6 +23,7 @@ type config struct {
 	Mode              string        `envconfig:"MODE"`
 	RateLimitRequests int           `envconfig:"RATE_LIMIT_REQUESTS" default:"100"`
 	RateLimitWindow   time.Duration `envconfig:"RATE_LIMIT_WINDOW" default:"1m"`
+	CacheSize         int           `envconfig:"CACHE_SIZE" default:"512"`
 }
 
 func init() {
@@ -43,6 +44,7 @@ func main() {
 	srvCfg := server.Config{
 		RateLimitRequests: cfg.RateLimitRequests,
 		RateLimitWindow:   cfg.RateLimitWindow,
+		CacheSize:         cfg.CacheSize,
 	}
 
 	switch cfg.Mode {
