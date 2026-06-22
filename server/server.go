@@ -15,6 +15,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 
 	"github.com/matbur/image-text/i18n"
 	"github.com/matbur/image-text/image"
@@ -24,12 +25,20 @@ import (
 	"github.com/matbur/image-text/wasm"
 )
 
-func NewServer() chi.Router {
+type Config struct {
+	RateLimitRequests int
+	RateLimitWindow   time.Duration
+}
+
+func NewServer(cfg Config) chi.Router {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
+	if cfg.RateLimitRequests > 0 {
+		r.Use(httprate.LimitByIP(cfg.RateLimitRequests, cfg.RateLimitWindow))
+	}
 
 	r.Get("/healthz", handleHealthz)
 	r.Get("/readyz", handleReadyz)

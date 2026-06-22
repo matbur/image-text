@@ -48,7 +48,7 @@ func TestIntegrationIndexPagePolish(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.AddCookie(&http.Cookie{Name: "lang", Value: "pl"})
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	body := rr.Body.String()
@@ -61,7 +61,7 @@ func TestIntegrationIndexPage(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Contains(t, rr.Header().Get("Content-Type"), "text/html")
@@ -75,7 +75,7 @@ func TestIntegrationOfflinePage(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/offline", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Contains(t, rr.Body.String(), "Generate image")
@@ -85,7 +85,7 @@ func TestIntegrationOnlinePageRedirect(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/online", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusSeeOther, rr.Code)
 	location := rr.Header().Get("Location")
@@ -99,7 +99,7 @@ func TestIntegrationOnlinePageWithParams(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/online?text=hello&bg_color=steel_blue&fg_color=yellow&size=vga&font=ubuntu_mono", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	body := rr.Body.String()
@@ -109,7 +109,7 @@ func TestIntegrationOnlinePageWithParams(t *testing.T) {
 
 func TestIntegrationOnlinePost(t *testing.T) {
 	rr := httptest.NewRecorder()
-	server.NewServer().ServeHTTP(rr, newOnlinePostRequest(t, false))
+	server.NewServer(server.Config{}).ServeHTTP(rr, newOnlinePostRequest(t, false))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Contains(t, rr.Header().Get("HX-Push-Url"), "/online?")
@@ -118,7 +118,7 @@ func TestIntegrationOnlinePost(t *testing.T) {
 
 func TestIntegrationOnlinePostHTMXPartial(t *testing.T) {
 	rr := httptest.NewRecorder()
-	server.NewServer().ServeHTTP(rr, newOnlinePostRequest(t, true))
+	server.NewServer(server.Config{}).ServeHTTP(rr, newOnlinePostRequest(t, true))
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	response := rr.Body.String()
@@ -130,7 +130,7 @@ func TestIntegrationImageBadRequest(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/vga/steel_blue/yellow?font=not_a_font", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
@@ -162,7 +162,7 @@ func TestIntegrationImage(t *testing.T) {
 			rr := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
 
-			server.NewServer().ServeHTTP(rr, req)
+			server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 			assert.Equal(t, http.StatusOK, rr.Code)
 			assert.Equal(t, `inline; filename="image.png"`, rr.Header().Get("Content-Disposition"))
@@ -175,7 +175,7 @@ func TestIntegrationDocsJSON(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/docs.json", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
@@ -203,7 +203,7 @@ func TestIntegrationDocsPage(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/docs", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	body := rr.Body.String()
@@ -216,7 +216,7 @@ func TestIntegrationFavicon(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.NotEmpty(t, rr.Body.Bytes())
@@ -226,7 +226,7 @@ func TestIntegrationStaticFont(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/resources/fonts/Roboto-VariableFont_wdth,wght.ttf", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.True(t, strings.HasSuffix(strings.ToLower(rr.Header().Get("Content-Type")), "font/ttf") ||
@@ -239,7 +239,7 @@ func TestIntegrationStaticWASM(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/resources/main.wasm", nil)
 	req.Header.Set("Accept-Encoding", "gzip")
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	assert.NotEmpty(t, rr.Body.Bytes())

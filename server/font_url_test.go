@@ -16,7 +16,7 @@ func TestIntegrationStaticFontEncodedComma(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/resources/fonts/Roboto-VariableFont_wdth%2Cwght.ttf", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	require.Greater(t, len(rr.Body.Bytes()), 1000)
@@ -26,7 +26,7 @@ func TestIntegrationOfflinePageFontFilesJSON(t *testing.T) {
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/offline", nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	body := rr.Body.String()
 	assert.Contains(t, body, "font-files-data")
@@ -41,7 +41,7 @@ func TestIntegrationStaticFontBitcount(t *testing.T) {
 	filename := "BitcountPropSingle-VariableFont_CRSV,ELSH,ELXP,slnt,wght.ttf"
 	req := httptest.NewRequest(http.MethodGet, "/resources/fonts/"+strings.ReplaceAll(filename, ",", "%2C"), nil)
 
-	server.NewServer().ServeHTTP(rr, req)
+	server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	require.Greater(t, len(rr.Body.Bytes()), 1000)

@@ -19,8 +19,10 @@ import (
 )
 
 type config struct {
-	Port string `envconfig:"PORT" default:"8080"`
-	Mode string `envconfig:"MODE"`
+	Port              string        `envconfig:"PORT" default:"8080"`
+	Mode              string        `envconfig:"MODE"`
+	RateLimitRequests int           `envconfig:"RATE_LIMIT_REQUESTS" default:"100"`
+	RateLimitWindow   time.Duration `envconfig:"RATE_LIMIT_WINDOW" default:"1m"`
 }
 
 func init() {
@@ -38,20 +40,25 @@ func main() {
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 
+	srvCfg := server.Config{
+		RateLimitRequests: cfg.RateLimitRequests,
+		RateLimitWindow:   cfg.RateLimitWindow,
+	}
+
 	switch cfg.Mode {
 	case "TEST":
 		mode2(addr)
 	default:
-		mode1(addr)
+		mode1(addr, srvCfg)
 	}
 }
 
-func mode1(addr string) {
+func mode1(addr string, srvCfg server.Config) {
 	slog.Info("Starting server", "addr", addr)
 
 	srv := &http.Server{
 		Addr:    addr,
-		Handler: server.NewServer(),
+		Handler: server.NewServer(srvCfg),
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -81,7 +88,7 @@ func mode1(addr string) {
 // for debug only
 func mode2(addr string) {
 	go func() {
-		mode1(addr)
+		mode1(addr, server.Config{})
 	}()
 
 	if strings.HasPrefix(addr, ":") {
