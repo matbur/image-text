@@ -31,6 +31,8 @@ func NewServer() chi.Router {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
 
+	r.Get("/healthz", handleHealthz)
+	r.Get("/readyz", handleReadyz)
 	r.Get("/", handleMain)
 	r.Get("/online", handleOnlinePage)
 	r.Post("/online/post", handleOnlinePost)
@@ -43,6 +45,18 @@ func NewServer() chi.Router {
 	r.Get("/{size}/{bg_color}/{fg_color}", handleImage)
 
 	return r
+}
+
+func handleHealthz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func handleReadyz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"ok"}`))
 }
 
 func handleStatic(w http.ResponseWriter, r *http.Request) {
