@@ -38,6 +38,10 @@ Environment variables:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT`   | `8080`  | HTTP port   |
+| `MODE`   | —       | Run mode (set to `TEST` for debug) |
+| `RATE_LIMIT_REQUESTS` | `100`  | Max requests per IP per window |
+| `RATE_LIMIT_WINDOW`   | `1m`   | Rate limit window duration   |
+| `CACHE_SIZE`          | `512`  | In-memory image cache entries (`0` to disable) |
 
 ## Web UI
 
