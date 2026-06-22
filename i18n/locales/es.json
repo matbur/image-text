@@ -1,5 +1,6 @@
 {
   "meta.title": "image-text",
+  "meta.description": "Genera imágenes de marcador de posición con texto, colores, tamaños y fuentes personalizados.",
   "meta.toggle_theme": "Alternar modo oscuro",
   "meta.github": "Ver código en GitHub",
   "meta.error_not_found": "Error: no se encontró el recurso",

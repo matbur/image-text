@@ -1,5 +1,6 @@
 {
   "meta.title": "image-text",
+  "meta.description": "Generate placeholder images with custom text, colors, sizes, and fonts.",
   "meta.toggle_theme": "Toggle dark mode",
   "meta.github": "View source on GitHub",
   "meta.error_not_found": "Error: Could Not Find Resource",

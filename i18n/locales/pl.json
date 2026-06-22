@@ -1,5 +1,6 @@
 {
   "meta.title": "image-text",
+  "meta.description": "Generuj obrazy zastępcze z własnym tekstem, kolorami, rozmiarami i fontami.",
   "meta.toggle_theme": "Przełącz tryb ciemny",
   "meta.github": "Zobacz kod na GitHubie",
   "meta.error_not_found": "Błąd: nie znaleziono zasobu",
