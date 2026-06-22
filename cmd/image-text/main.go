@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -45,9 +49,27 @@ func main() {
 func mode1(addr string) {
 	slog.Info("Starting server", "addr", addr)
 
-	srv := server.NewServer()
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: server.NewServer(),
+	}
 
-	if err := http.ListenAndServe(addr, srv); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	go func() {
+		<-ctx.Done()
+		slog.Info("Shutting down gracefully...")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			slog.Error("Graceful shutdown failed", "err", err)
+		}
+	}()
+
+	if err := srv.ListenAndServe(); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			slog.Info("Server closed")
 			return
