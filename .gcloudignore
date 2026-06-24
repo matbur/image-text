@@ -1,0 +1,12 @@
+*
+!cmd/
+!i18n/
+!image/
+!pkg/
+!resources/
+!server/
+!templates/
+!version/
+!wasm/
+!go.mod
+!go.sum
