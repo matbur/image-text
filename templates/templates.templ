@@ -2,11 +2,13 @@ package templates
 
 import "github.com/matbur/image-text/i18n"
 
+var EnvLabel string
+
 templ head(locale i18n.Locale) {
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<title>{ locale.T("meta.title") }</title>
+		<title>{ locale.T("meta.title") }{ envTitleSuffix() }</title>
 		<meta name="description" content={ locale.T("meta.description") }/>
 		<link rel="icon" href="/resources/favicon.png"/>
 		<script>
@@ -326,7 +328,9 @@ templ IndexPage(params IndexPageParams) {
 		<div class="d-flex flex-column min-vh-100">
 			<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4 flex-grow-1">
 				<header class="index-hero text-center mb-5">
-					<h1 class="display-4 fw-bold mb-2">{ params.I18n.T("meta.title") }</h1>
+					<h1 class="display-4 fw-bold mb-2">
+						{ params.I18n.T("meta.title") } @envLabelBadge()
+					</h1>
 					<p class="lead text-body-secondary mb-3">{ params.I18n.T("index.lead") }</p>
 					<a href="/docs" class="text-decoration-none link-secondary">📄 { params.I18n.T("index.api_docs") }</a>
 				</header>
@@ -383,11 +387,18 @@ type OnlinePageParams struct {
 	I18n         i18n.Locale       `json:"-"`
 }
 
+templ envLabelBadge() {
+	if EnvLabel != "" {
+		<span class="badge bg-secondary-subtle text-secondary-emphasis align-middle fs-6 fw-normal ms-2">{ EnvLabel }</span>
+	}
+}
+
 templ pageHeader(locale i18n.Locale, labelKey string, badgeClass string, descriptionKey string) {
 	<header class="page-hero mb-4">
 		<a href="/" class="text-decoration-none text-body-emphasis">
 			<h1 class="display-5 fw-bold mb-2">
 				{ locale.T("meta.title") } <span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>{ locale.T(labelKey) }</span>
+				@envLabelBadge()
 			</h1>
 		</a>
 		<p class="text-body-secondary mb-2">{ locale.T(descriptionKey) }</p>

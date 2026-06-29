@@ -16,6 +16,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/matbur/image-text/server"
+	"github.com/matbur/image-text/templates"
 )
 
 type config struct {
@@ -57,6 +58,14 @@ func main() {
 
 func mode1(addr string, srvCfg server.Config) {
 	slog.Info("Starting server", "addr", addr)
+
+	if os.Getenv("K_SERVICE") != "" {
+		templates.EnvLabel = ""
+	} else if _, err := os.Stat("/.dockerenv"); err == nil {
+		templates.EnvLabel = "docker"
+	} else {
+		templates.EnvLabel = "local"
+	}
 
 	srv := &http.Server{
 		Addr:    addr,
