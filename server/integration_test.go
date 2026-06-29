@@ -166,6 +166,7 @@ func TestIntegrationImage(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, rr.Code)
 			assert.Equal(t, `inline; filename="image.png"`, rr.Header().Get("Content-Disposition"))
+			assert.Equal(t, "public, max-age=31536000, immutable", rr.Header().Get("Cache-Control"))
 			assertPNGSignature(t, rr.Body.Bytes())
 		})
 	}

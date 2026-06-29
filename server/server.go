@@ -90,9 +90,11 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 
 		key := cacheKey(size, bgColor, fgColor, text, font)
 
+		w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+
 		if cache != nil {
 			if bb, ok := cache.Get(key); ok {
-				w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 				w.Write(bb)
 				slog.With(
 					"response", "binary",
@@ -103,8 +105,6 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 				return
 			}
 		}
-
-		w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 
 		img, err := image.New(size, bgColor, fgColor, text, font)
 		if err != nil {
