@@ -2,25 +2,49 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - -t
-      - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_FULL_NAME:$SHORT_SHA
-      - --build-arg=COMMIT_SHA=$SHORT_SHA
+      - '--no-cache'
+      - '-t'
+      - >-
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - '--build-arg=COMMIT_SHA=$COMMIT_SHA'
       - .
-
+      - '-f'
+      - Dockerfile
+    id: Build
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_FULL_NAME:$SHORT_SHA
-
-  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
-    entrypoint: gcloud
+      - >-
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     args:
       - run
-      - deploy
+      - services
+      - update
       - $_SERVICE_NAME
-      - --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_FULL_NAME:$SHORT_SHA
-      - --region=$_DEPLOY_REGION
-      - --allow-unauthenticated
-
+      - '--platform=managed'
+      - >-
+        --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - >-
+    $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 options:
+  substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _TRIGGER_ID: f429772a-e273-49d8-844f-4f69d6f7db35
+  _AR_HOSTNAME: europe-central2-docker.pkg.dev
+  _PLATFORM: managed
+  _SERVICE_NAME: image-text
+  _DEPLOY_REGION: europe-central2
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - image-text
