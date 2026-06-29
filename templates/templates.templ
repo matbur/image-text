@@ -157,7 +157,12 @@ templ buildVersionFooter(locale i18n.Locale, commitSHA string) {
 	if commitSHA != "" {
 		<footer class="build-version-footer text-center small text-body-secondary py-3 border-top">
 			<span>{ locale.T("footer.build_version") }</span>
-			<a href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) } target="_blank" rel="noopener noreferrer" class="text-decoration-none link-secondary font-monospace ms-1">{ commitSHA }</a>
+			<a
+				href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) }
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-decoration-none link-secondary font-monospace ms-1"
+			>{ commitSHA }</a>
 		</footer>
 	}
 }
@@ -208,7 +213,13 @@ templ languageSwitcher(locale i18n.Locale) {
 }
 
 templ githubCorner(locale i18n.Locale) {
-	<a href="https://github.com/matbur/image-text" target="_blank" rel="noopener noreferrer" class="github-corner" aria-label={ locale.T("meta.github") }>
+	<a
+		href="https://github.com/matbur/image-text"
+		target="_blank"
+		rel="noopener noreferrer"
+		class="github-corner"
+		aria-label={ locale.T("meta.github") }
+	>
 		<svg
 			width="80"
 			height="80"
@@ -326,7 +337,9 @@ templ IndexPage(params IndexPageParams) {
 	@layout(params.I18n) {
 		@githubCorner(params.I18n)
 		<div class="d-flex flex-column min-vh-100">
-			<div class="container centered-container d-flex flex-column justify-content-center align-items-center py-4 flex-grow-1">
+			<div
+				class="container centered-container d-flex flex-column justify-content-center align-items-center py-4 flex-grow-1"
+			>
 				<header class="index-hero text-center mb-5">
 					<h1 class="display-4 fw-bold mb-2">
 						{ params.I18n.T("meta.title") } @envLabelBadge()
@@ -345,7 +358,9 @@ templ IndexPage(params IndexPageParams) {
 									<h2 class="h5 card-title mb-0">{ params.I18n.T("index.online.title") }</h2>
 									<span class="badge text-bg-primary">{ params.I18n.T("index.online.badge") }</span>
 								</div>
-								<p class="card-text text-body-secondary flex-grow-1">{ params.I18n.T("index.online.description") }</p>
+								<p class="card-text text-body-secondary flex-grow-1">
+									{ params.I18n.T("index.online.description") }
+								</p>
 								<a href="/online" class="btn btn-primary mt-2">{ params.I18n.T("index.online.cta") }</a>
 							</div>
 						</div>
@@ -360,8 +375,13 @@ templ IndexPage(params IndexPageParams) {
 									<h2 class="h5 card-title mb-0">{ params.I18n.T("index.offline.title") }</h2>
 									<span class="badge text-bg-secondary">{ params.I18n.T("index.offline.badge") }</span>
 								</div>
-								<p class="card-text text-body-secondary flex-grow-1">{ params.I18n.T("index.offline.description") }</p>
-								<a href="/offline" class="btn btn-outline-primary mt-2">{ params.I18n.T("index.offline.cta") }</a>
+								<p class="card-text text-body-secondary flex-grow-1">
+									{ 
+							params.I18n.T("index.offline.description") }
+								</p>
+								<a href="/offline" class="btn btn-outline-primary mt-2">
+									{ params.I18n.T("index.offline.cta") }
+								</a>
 							</div>
 						</div>
 					</div>
@@ -378,13 +398,15 @@ type OnlinePageParams struct {
 	FgColor string `json:"fg_color"`
 	Size    string `json:"size"`
 	Font    string `json:"font"`
+	Format  string `json:"format"`
 	Image   string `json:"-"`
 
-	ColorOptions []string          `json:"-"`
-	SizeOptions  []string          `json:"-"`
-	FontOptions  []string          `json:"-"`
-	FontFiles    map[string]string `json:"-"`
-	I18n         i18n.Locale       `json:"-"`
+	ColorOptions  []string          `json:"-"`
+	SizeOptions   []string          `json:"-"`
+	FontOptions   []string          `json:"-"`
+	FormatOptions []string          `json:"-"`
+	FontFiles     map[string]string `json:"-"`
+	I18n          i18n.Locale       `json:"-"`
 }
 
 templ envLabelBadge() {
@@ -397,7 +419,11 @@ templ pageHeader(locale i18n.Locale, labelKey string, badgeClass string, descrip
 	<header class="page-hero mb-4">
 		<a href="/" class="text-decoration-none text-body-emphasis">
 			<h1 class="display-5 fw-bold mb-2">
-				{ locale.T("meta.title") } <span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>{ locale.T(labelKey) }</span>
+				{ locale.T("meta.title") }
+				<span class={ "badge ms-2 align-middle fs-6 fw-normal " + badgeClass }>
+					{ 
+				locale.T(labelKey) }
+				</span>
 				@envLabelBadge()
 			</h1>
 		</a>
@@ -424,10 +450,21 @@ templ OnlinePage(params OnlinePageParams) {
 				<div class="col-lg-7">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.settings") }</h2>
-							<form method="post" action="/online" hx-ext="json-enc" hx-post="/online/post" hx-target="#image-result">
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ 
+						params.I18n.T("common.settings") }
+							</h2>
+							<form
+								method="post"
+								action="/online"
+								hx-ext="json-enc"
+								hx-post="/online/post"
+								hx-target="#image-result"
+							>
 								<div class="row mb-3">
-									<label for="bg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.bg_color") }</label>
+									<label for="bg_color" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.bg_color") }
+									</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -445,7 +482,9 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="fg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.text_color") }</label>
+									<label for="fg_color" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.text_color") }
+									</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -489,12 +528,30 @@ templ OnlinePage(params OnlinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
+									<label for="format" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.format") }
+									</label>
+									<div class="col-sm-10">
+										<select
+											class="form-select"
+											id="format"
+											name="format"
+											onchange="this.form.requestSubmit()"
+										>
+											@fontOptions(params.Format, params.FormatOptions)
+										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
 									<label for="text" class="col-sm-2 col-form-label">{ params.I18n.T("common.text") }</label>
 									<div class="col-sm-10">
 										<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
 									</div>
 								</div>
-								<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">{ params.I18n.T("common.generate") }</button>
+								<button type="submit" class="btn btn-primary" onmousedown="event.preventDefault()">
+									{ 
+							params.I18n.T("common.generate") }
+								</button>
 							</form>
 						</div>
 					</div>
@@ -502,7 +559,9 @@ templ OnlinePage(params OnlinePageParams) {
 				<div class="col-lg-5">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.preview") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ params.I18n.T("common.preview") }
+							</h2>
 							@Img(params.I18n, params.Image)
 						</div>
 					</div>
@@ -522,10 +581,15 @@ templ OfflinePage(params OfflinePageParams) {
 				<div class="col-lg-7">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.settings") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ 
+						params.I18n.T("common.settings") }
+							</h2>
 							<form onsubmit="callGoFunction(); return false;">
 								<div class="row mb-3">
-									<label for="bg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.bg_color") }</label>
+									<label for="bg_color" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.bg_color") }
+									</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -543,7 +607,9 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="fg_color" class="col-sm-2 col-form-label">{ params.I18n.T("common.text_color") }</label>
+									<label for="fg_color" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.text_color") }
+									</label>
 									<div class="col-sm-10">
 										<input
 											type="text"
@@ -587,18 +653,25 @@ templ OfflinePage(params OfflinePageParams) {
 									</div>
 								</div>
 								<div class="row mb-3">
-									<label for="text" class="col-sm-2 col-form-label">{ params.I18n.T("common.text") }</label>
+									<label for="format" class="col-sm-2 col-form-label">
+										{ params.I18n.T("common.format") }
+									</label>
 									<div class="col-sm-10">
-										<input
-											type="text"
-											class="form-control"
-											id="text"
-											value={ params.Text }
-											name="text"
-										/>
+										<select class="form-select" id="format" name="format" onchange="callGoFunction()">
+											@fontOptions(params.Format, params.FormatOptions)
+										</select>
 									</div>
 								</div>
-								<button type="submit" class="btn btn-outline-primary" onmousedown="event.preventDefault()">{ params.I18n.T("common.generate") }</button>
+								<div class="row mb-3">
+									<label for="text" class="col-sm-2 col-form-label">{ params.I18n.T("common.text") }</label>
+									<div class="col-sm-10">
+										<input type="text" class="form-control" id="text" value={ params.Text } name="text"/>
+									</div>
+								</div>
+								<button type="submit" class="btn btn-outline-primary" onmousedown="event.preventDefault()">
+									{ 
+							params.I18n.T("common.generate") }
+								</button>
 							</form>
 						</div>
 					</div>
@@ -606,7 +679,9 @@ templ OfflinePage(params OfflinePageParams) {
 				<div class="col-lg-5">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("common.preview") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ params.I18n.T("common.preview") }
+							</h2>
 							@Img(params.I18n, "")
 						</div>
 					</div>
@@ -683,6 +758,7 @@ templ OfflinePage(params OfflinePageParams) {
 		fgColor: getValue("fg_color"),
 		size: getValue("size"),
 		font: getValue("font"),
+		format: getValue("format"),
 		text: getValue("text"),
 	})
 
@@ -702,7 +778,8 @@ templ OfflinePage(params OfflinePageParams) {
 		if (err) {
 			console.error(err)
 		} else {
-			img.setAttribute("src", "data:image/png;base64," + imageBase64);
+			const mime = values.format === "webp" ? "image/webp" : values.format === "jpg" ? "image/jpeg" : "image/png";
+			img.setAttribute("src", "data:" + mime + ";base64," + imageBase64);
 		}
 
 		if (active && typeof active.focus === "function") {
@@ -746,13 +823,17 @@ templ DocsPage(params DocsPageParams) {
 			</header>
 			<div class="card shadow-sm border-0 mb-4">
 				<div class="card-body">
-					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.url_pattern") }</h2>
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+						{ params.I18n.T("docs.url_pattern") }
+					</h2>
 					<pre class="docs-code mb-0">{ params.Path }</pre>
 				</div>
 			</div>
 			<div class="card shadow-sm border-0 mb-4">
 				<div class="card-body">
-					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.query_params") }</h2>
+					<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+						{ params.I18n.T("docs.query_params") }
+					</h2>
 					<dl class="row mb-0">
 						for name, value := range params.Params {
 							<dt class="col-sm-3">{ name }</dt>
@@ -774,7 +855,9 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.colors") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ params.I18n.T("docs.colors") }
+							</h2>
 							<div class="docs-scroll">
 								<dl class="row mb-0 small">
 									for _, entry := range params.ColorEntries {
@@ -789,7 +872,9 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.sizes") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ params.I18n.T("docs.sizes") }
+							</h2>
 							<div class="docs-scroll">
 								<dl class="row mb-0 small">
 									for _, entry := range params.SizeEntries {
@@ -804,7 +889,9 @@ templ DocsPage(params DocsPageParams) {
 				<div class="col-md-4">
 					<div class="card shadow-sm border-0 h-100">
 						<div class="card-body">
-							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">{ params.I18n.T("docs.fonts") }</h2>
+							<h2 class="h6 text-uppercase text-body-secondary fw-semibold mb-3">
+								{ params.I18n.T("docs.fonts") }
+							</h2>
 							<div class="docs-scroll">
 								<ul class="list-unstyled small mb-0">
 									for _, font := range params.Fonts {

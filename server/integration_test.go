@@ -144,16 +144,28 @@ func TestIntegrationImageBadRequest(t *testing.T) {
 
 func TestIntegrationImage(t *testing.T) {
 	tests := []struct {
-		name string
-		url  string
+		name               string
+		url                string
+		contentType        string
+		contentDisposition string
 	}{
 		{
-			name: "default",
-			url:  "/vga/steel_blue/yellow?text=hello",
+			name:               "default",
+			url:                "/vga/steel_blue/yellow?text=hello",
+			contentType:        "image/png",
+			contentDisposition: `inline; filename="image.png"`,
 		},
 		{
-			name: "with font",
-			url:  "/vga/steel_blue/yellow?text=hello&font=open_sans",
+			name:               "with font",
+			url:                "/vga/steel_blue/yellow?text=hello&font=open_sans",
+			contentType:        "image/png",
+			contentDisposition: `inline; filename="image.png"`,
+		},
+		{
+			name:               "jpeg format",
+			url:                "/vga/steel_blue/yellow?text=hello&format=jpg",
+			contentType:        "image/jpeg",
+			contentDisposition: `inline; filename="image.jpg"`,
 		},
 	}
 
@@ -165,9 +177,12 @@ func TestIntegrationImage(t *testing.T) {
 			server.NewServer(server.Config{}).ServeHTTP(rr, req)
 
 			assert.Equal(t, http.StatusOK, rr.Code)
-			assert.Equal(t, `inline; filename="image.png"`, rr.Header().Get("Content-Disposition"))
+			assert.Equal(t, tt.contentDisposition, rr.Header().Get("Content-Disposition"))
+			assert.Equal(t, tt.contentType, rr.Header().Get("Content-Type"))
 			assert.Equal(t, "public, max-age=31536000, immutable", rr.Header().Get("Cache-Control"))
-			assertPNGSignature(t, rr.Body.Bytes())
+			if tt.contentType == "image/png" {
+				assertPNGSignature(t, rr.Body.Bytes())
+			}
 		})
 	}
 }

@@ -1,6 +1,6 @@
 module github.com/matbur/image-text
 
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/a-h/templ v0.2.793
@@ -11,8 +11,9 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kelseyhightower/envconfig v1.3.0
+	github.com/skrashevich/go-webp v0.1.0
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
+	golang.org/x/image v0.36.0
 )
 
 require (

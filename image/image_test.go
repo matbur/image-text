@@ -2,6 +2,7 @@ package image_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,8 +11,8 @@ import (
 	"github.com/matbur/image-text/image"
 )
 
-func fixtureName(size, bgColor, fgColor, text string) string {
-	return size + "-" + bgColor + "-" + fgColor + "-" + text + ".png"
+func fixtureName(size, bgColor, fgColor, text, format string) string {
+	return fmt.Sprintf("%s-%s-%s-%s.%s", size, bgColor, fgColor, text, format)
 }
 
 func TestDraw(t *testing.T) {
@@ -50,46 +51,48 @@ func TestDraw(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		name := fixtureName(tt.size, tt.bgColor, tt.fgColor, tt.text)
-		t.Run(name, func(t *testing.T) {
-			img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text, "")
-			require.NoError(t, err)
+		for _, format := range image.KnownFormats() {
+			name := fixtureName(tt.size, tt.bgColor, tt.fgColor, tt.text, string(format))
+			t.Run(name, func(t *testing.T) {
+				img, err := image.New(tt.size, tt.bgColor, tt.fgColor, tt.text, "", string(format))
+				require.NoError(t, err)
 
-			var buf bytes.Buffer
-			require.NoError(t, img.Draw(&buf))
-			assertValidPNG(t, buf.Bytes(), tt.width, tt.height)
-			assertMatchesFixture(t, name, buf.Bytes())
-		})
+				var buf bytes.Buffer
+				require.NoError(t, img.Draw(&buf))
+				assertValidImage(t, string(format), buf.Bytes(), tt.width, tt.height)
+				assertMatchesFixture(t, name, buf.Bytes())
+			})
+		}
 	}
 }
 
 func TestNewDefaultsEmptyText(t *testing.T) {
-	img, err := image.New("vga", "steel_blue", "yellow", "", "")
+	img, err := image.New("vga", "steel_blue", "yellow", "", "", "")
 	require.NoError(t, err)
 	assert.Equal(t, "640x480", img.Text())
 }
 
 func TestNewInvalidParams(t *testing.T) {
-	img, err := image.New("bad", "bad", "bad", "hello", "bad")
+	img, err := image.New("bad", "bad", "bad", "hello", "bad", "")
 	require.Error(t, err)
 	require.NotNil(t, img)
 
 	var buf bytes.Buffer
 	require.NoError(t, img.Draw(&buf))
-	assertValidPNG(t, buf.Bytes(), 640, 480)
+	assertValidImage(t, "png", buf.Bytes(), 640, 480)
 }
 
 func TestNewWithFont(t *testing.T) {
-	img, err := image.New("320x200", "000", "fff", "hello", "open_sans")
+	img, err := image.New("320x200", "000", "fff", "hello", "open_sans", "")
 	require.NoError(t, err)
 
 	var buf bytes.Buffer
 	require.NoError(t, img.Draw(&buf))
-	assertValidPNG(t, buf.Bytes(), 320, 200)
+	assertValidImage(t, "png", buf.Bytes(), 320, 200)
 }
 
 func TestImageAccessors(t *testing.T) {
-	img, err := image.New("vga", "steel_blue", "yellow", "hello", "ubuntu_mono")
+	img, err := image.New("vga", "steel_blue", "yellow", "hello", "ubuntu_mono", "")
 	require.NoError(t, err)
 
 	assert.Equal(t, "hello", img.Text())

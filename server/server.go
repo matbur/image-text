@@ -74,8 +74,8 @@ func imageCache(cfg Config) *lru.Cache[string, []byte] {
 	return c
 }
 
-func cacheKey(size, bgColor, fgColor, text, font string) string {
-	return fmt.Sprintf("%s/%s/%s?text=%s&font=%s", size, bgColor, fgColor, text, font)
+func cacheKey(size, bgColor, fgColor, text, font, format string) string {
+	return fmt.Sprintf("%s/%s/%s?text=%s&font=%s&format=%s", size, bgColor, fgColor, text, font, format)
 }
 
 func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
@@ -87,11 +87,13 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 		fgColor := chi.URLParam(r, "fg_color")
 		text := r.URL.Query().Get("text")
 		font := r.URL.Query().Get("font")
+		format := r.URL.Query().Get("format")
 
-		key := cacheKey(size, bgColor, fgColor, text, font)
+		key := cacheKey(size, bgColor, fgColor, text, font, format)
 
-		w.Header().Set("Content-Disposition", `inline; filename="image.png"`)
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="image.%s"`, image.Extension(format)))
+		w.Header().Set("Content-Type", image.ContentType(format))
 
 		if cache != nil {
 			if bb, ok := cache.Get(key); ok {
@@ -106,7 +108,7 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 			}
 		}
 
-		img, err := image.New(size, bgColor, fgColor, text, font)
+		img, err := image.New(size, bgColor, fgColor, text, font, format)
 		if err != nil {
 			writeJSON(w, err.Error(), http.StatusBadRequest)
 			return
@@ -188,6 +190,7 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 	size := q.Get("size")
 
 	font := q.Get("font")
+	format := q.Get("format")
 	if bgColor == "" || fgColor == "" || size == "" {
 		q := url.Values{}
 		q.Set("text", text)
@@ -195,6 +198,7 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 		q.Set("fg_color", cmp.Or(fgColor, "yellow"))
 		q.Set("size", cmp.Or(size, "vga"))
 		q.Set("font", cmp.Or(font, "ubuntu_mono"))
+		q.Set("format", cmp.Or(format, "png"))
 
 		u := url.URL{Path: "/online", RawQuery: q.Encode()}
 
@@ -205,20 +209,25 @@ func handleOnlinePage(w http.ResponseWriter, r *http.Request) {
 	imageQuery := url.Values{}
 	imageQuery.Set("text", text)
 	imageQuery.Set("font", cmp.Or(font, "ubuntu_mono"))
+	if format != "" && format != "png" {
+		imageQuery.Set("format", format)
+	}
 	u := &url.URL{Path: "/", RawQuery: imageQuery.Encode()}
 	u = u.JoinPath(size, bgColor, fgColor)
 
 	params := templates.OnlinePageParams{
-		Text:         text,
-		BgColor:      bgColor,
-		FgColor:      fgColor,
-		Size:         size,
-		Font:         cmp.Or(font, "ubuntu_mono"),
-		Image:        u.String(),
-		ColorOptions: pie.Keys(image.KnownColors()),
-		SizeOptions:  pie.Keys(image.KnownSizes()),
-		FontOptions:  image.KnownFontNames(),
-		I18n:         locale,
+		Text:          text,
+		BgColor:       bgColor,
+		FgColor:       fgColor,
+		Size:          size,
+		Font:          cmp.Or(font, "ubuntu_mono"),
+		Format:        cmp.Or(format, "png"),
+		Image:         u.String(),
+		ColorOptions:  pie.Keys(image.KnownColors()),
+		SizeOptions:   pie.Keys(image.KnownSizes()),
+		FontOptions:   image.KnownFontNames(),
+		FormatOptions: image.KnownFormatStrings(),
+		I18n:          locale,
 	}
 	templ.Handler(templates.OnlinePage(params)).ServeHTTP(w, r)
 }
@@ -254,15 +263,19 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	q.Set("fg_color", params.FgColor)
 	q.Set("size", params.Size)
 	q.Set("font", cmp.Or(params.Font, "ubuntu_mono"))
+	q.Set("format", cmp.Or(params.Format, "png"))
 
 	u := &url.URL{Path: "/online", RawQuery: q.Encode()}
 	w.Header().Set("HX-Push-Url", u.String())
 	slog.Info("Pushing", "url", u.String())
 
-	u2 := &url.URL{RawQuery: url.Values{
-		"text": {params.Text},
-		"font": {cmp.Or(params.Font, "ubuntu_mono")},
-	}.Encode()}
+	imgQuery := url.Values{}
+	imgQuery.Set("text", params.Text)
+	imgQuery.Set("font", cmp.Or(params.Font, "ubuntu_mono"))
+	if params.Format != "" && params.Format != "png" {
+		imgQuery.Set("format", params.Format)
+	}
+	u2 := &url.URL{RawQuery: imgQuery.Encode()}
 	u2 = u2.JoinPath(params.Size, params.BgColor, params.FgColor)
 	slog.Info("Image url", "url", u2.String())
 
@@ -270,6 +283,7 @@ func handleOnlinePost(w http.ResponseWriter, r *http.Request) {
 	params.ColorOptions = pie.Keys(image.KnownColors())
 	params.SizeOptions = pie.Keys(image.KnownSizes())
 	params.FontOptions = image.KnownFontNames()
+	params.FormatOptions = image.KnownFormatStrings()
 	if r.Header.Get("HX-Request") != "" {
 		templ.Handler(templates.Img(locale, params.Image)).ServeHTTP(w, r)
 		return
@@ -298,10 +312,12 @@ var docs = struct {
 	Sizes    map[string]string `json:"sizes"`
 	Fonts    []string          `json:"fonts"`
 }{
-	Path: "HOST/size/background/foreground?text=rendered+text&font=ubuntu_mono",
+	Path: "HOST/size/background/foreground?text=rendered+text&font=ubuntu_mono&format=png",
 	Examples: map[string]string{
 		"with_names": "/hd720/steel_blue/yellow?text=rendered+text&font=ubuntu_mono",
 		"with_codes": "/320x200/000/FFFF00?font=open_sans",
+		"with_jpeg":  "/hd720/steel_blue/yellow?text=photo&format=jpg",
+		"with_webp":  "/hd720/steel_blue/yellow?text=photo&format=webp",
 	},
 	Colors: image.KnownColorStrings(),
 	Sizes:  image.KnownSizeStrings(),
@@ -310,8 +326,9 @@ var docs = struct {
 
 func docsParams(locale i18n.Locale) map[string]string {
 	return map[string]string{
-		"text": locale.T("docs.param.text"),
-		"font": locale.T("docs.param.font"),
+		"text":   locale.T("docs.param.text"),
+		"font":   locale.T("docs.param.font"),
+		"format": locale.T("docs.param.format"),
 	}
 }
 
@@ -384,12 +401,14 @@ func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 func handleOfflinePage(w http.ResponseWriter, r *http.Request) {
 	locale := i18n.FromRequest(r)
 	params := templates.OfflinePageParams{
-		Font:         "ubuntu_mono",
-		ColorOptions: pie.Keys(image.KnownColors()),
-		SizeOptions:  pie.Keys(image.KnownSizes()),
-		FontOptions:  image.KnownFontNames(),
-		FontFiles:    image.KnownFontFilenames(),
-		I18n:         locale,
+		Font:          "ubuntu_mono",
+		Format:        "png",
+		ColorOptions:  pie.Keys(image.KnownColors()),
+		SizeOptions:   pie.Keys(image.KnownSizes()),
+		FontOptions:   image.KnownFontNames(),
+		FormatOptions: image.KnownFormatStrings(),
+		FontFiles:     image.KnownFontFilenames(),
+		I18n:          locale,
 	}
 	templ.Handler(templates.OfflinePage(params)).ServeHTTP(w, r)
 }

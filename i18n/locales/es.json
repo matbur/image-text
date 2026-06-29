@@ -30,6 +30,7 @@
   "common.text_color": "Color del texto",
   "common.size": "Tamaño",
   "common.font": "Fuente",
+  "common.format": "Formato",
   "common.text": "Texto",
   "common.generate": "Generar imagen",
   "common.preview_alt": "Vista previa generada",
@@ -44,5 +45,8 @@
   "docs.example.with_names": "con_nombres",
   "docs.example.with_codes": "con_codigos",
   "docs.param.text": "texto renderizado (opcional, por defecto el tamaño)",
-  "docs.param.font": "nombre de fuente (opcional, por defecto ubuntu_mono)"
+  "docs.param.font": "nombre de fuente (opcional, por defecto ubuntu_mono)",
+  "docs.param.format": "formato de imagen: png, jpg o webp (opcional, por defecto png)",
+  "docs.example.with_jpeg": "con_jpeg",
+  "docs.example.with_webp": "con_webp"
 }

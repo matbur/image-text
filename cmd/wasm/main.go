@@ -19,8 +19,12 @@ func imageText(this js.Value, p []js.Value) any {
 	text := p[0].Get("text").String()
 
 	font := p[0].Get("font").String()
+	format := p[0].Get("format").String()
+	if format == "undefined" {
+		format = ""
+	}
 
-	img, err := image.New(size, bgColor, fgColor, text, font)
+	img, err := image.New(size, bgColor, fgColor, text, font, format)
 	if err != nil {
 		slog.Error("Failed to create image", "err", err)
 		return map[string]any{"err": err.Error()}
