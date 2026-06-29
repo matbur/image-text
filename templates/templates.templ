@@ -155,7 +155,7 @@ templ buildVersionFooter(locale i18n.Locale, commitSHA string) {
 	if commitSHA != "" {
 		<footer class="build-version-footer text-center small text-body-secondary py-3 border-top">
 			<span>{ locale.T("footer.build_version") }</span>
-			<a href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) } class="text-decoration-none link-secondary font-monospace ms-1">{ commitSHA }</a>
+			<a href={ templ.URL("https://github.com/matbur/image-text/commit/" + commitSHA) } target="_blank" rel="noopener noreferrer" class="text-decoration-none link-secondary font-monospace ms-1">{ commitSHA }</a>
 		</footer>
 	}
 }
