@@ -136,10 +136,14 @@ func TestIntegrationImageBadRequest(t *testing.T) {
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
 	var payload struct {
-		Error string `json:"error"`
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
 	}
 	require.NoError(t, json.Unmarshal(rr.Body.Bytes(), &payload))
-	assert.Contains(t, payload.Error, "font")
+	assert.Equal(t, "INVALID_FONT", payload.Error.Code)
+	assert.Contains(t, payload.Error.Message, "font")
 }
 
 func TestIntegrationImage(t *testing.T) {

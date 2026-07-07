@@ -11,9 +11,9 @@ import (
 func TestWriteJSON(t *testing.T) {
 	rr := httptest.NewRecorder()
 
-	writeJSON(rr, "bad request", http.StatusBadRequest)
+	writeJSON(rr, CodeBadRequest, "bad request", http.StatusBadRequest)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
-	assert.JSONEq(t, `{"error":"bad request"}`, rr.Body.String())
+	assert.JSONEq(t, `{"error":{"code":"BAD_REQUEST","message":"bad request"}}`, rr.Body.String())
 }

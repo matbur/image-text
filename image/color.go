@@ -39,7 +39,7 @@ func NewForegroundColorFromString(s string) (Color, error) {
 
 func NewColorFromString(s string) (Color, error) {
 	if s == "" {
-		return DefaultBackgroundColor(), fmt.Errorf("color is empty: %w", errorMissing)
+		return DefaultBackgroundColor(), fmt.Errorf("color is empty: %w", ErrMissing)
 	}
 
 	s = strings.ToLower(s)
@@ -49,7 +49,7 @@ func NewColorFromString(s string) (Color, error) {
 	}
 
 	if !colorPattern.MatchString(s) {
-		return DefaultBackgroundColor(), fmt.Errorf("color '%s' is not valid: %w", s, errorMalformed)
+		return DefaultBackgroundColor(), fmt.Errorf("color '%s' is not valid: %w", s, ErrMalformed)
 	}
 
 	var ss []string
@@ -62,22 +62,22 @@ func NewColorFromString(s string) (Color, error) {
 	case 6:
 		ss = []string{s[0:2], s[2:4], s[4:6]}
 	default:
-		return DefaultBackgroundColor(), fmt.Errorf("bad color '%s': %w", s, errorUnexpected)
+		return DefaultBackgroundColor(), fmt.Errorf("bad color '%s': %w", s, ErrUnexpected)
 	}
 
 	red, err := strconv.ParseUint(ss[0], 16, 8)
 	if err != nil {
-		return DefaultBackgroundColor(), fmt.Errorf("bad red '%s': %v: %w", ss[0], err, errorUnexpected)
+		return DefaultBackgroundColor(), fmt.Errorf("bad red '%s': %v: %w", ss[0], err, ErrUnexpected)
 	}
 
 	green, err := strconv.ParseUint(ss[1], 16, 8)
 	if err != nil {
-		return DefaultBackgroundColor(), fmt.Errorf("bad green '%s': %v: %w", ss[1], err, errorUnexpected)
+		return DefaultBackgroundColor(), fmt.Errorf("bad green '%s': %v: %w", ss[1], err, ErrUnexpected)
 	}
 
 	blue, err := strconv.ParseUint(ss[2], 16, 8)
 	if err != nil {
-		return DefaultBackgroundColor(), fmt.Errorf("bad blue '%s': %v: %w", ss[2], err, errorUnexpected)
+		return DefaultBackgroundColor(), fmt.Errorf("bad blue '%s': %v: %w", ss[2], err, ErrUnexpected)
 	}
 
 	return NewColor(red, green, blue), nil

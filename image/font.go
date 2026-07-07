@@ -92,7 +92,7 @@ func NewFontFromString(s string) (*truetype.Font, error) {
 		return fnt, nil
 	}
 
-	return DefaultFont(), fmt.Errorf("font '%s' is not valid: %w", s, errorMalformed)
+	return DefaultFont(), fmt.Errorf("font '%s' is not valid: %w", s, ErrMalformed)
 }
 
 func KnownFonts() map[string]*truetype.Font {
@@ -133,7 +133,7 @@ func KnownFontFilenames() map[string]string {
 func RegisterFont(key string, data []byte) error {
 	key = strings.ToLower(strings.TrimSpace(key))
 	if key == "" {
-		return fmt.Errorf("font name is empty: %w", errorMalformed)
+		return fmt.Errorf("font name is empty: %w", ErrMalformed)
 	}
 
 	fnt, err := truetype.Parse(data)
@@ -148,12 +148,12 @@ func RegisterFont(key string, data []byte) error {
 func loadFontFile(filePath string) (*truetype.Font, error) {
 	bb, err := resources.Static.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file '%s': %v: %w", filePath, err, errorUnexpected)
+		return nil, fmt.Errorf("failed to read file '%s': %v: %w", filePath, err, ErrUnexpected)
 	}
 
 	fnt, err := truetype.Parse(bb)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse font '%s': %v: %w", filePath, err, errorUnexpected)
+		return nil, fmt.Errorf("failed to parse font '%s': %v: %w", filePath, err, ErrUnexpected)
 	}
 
 	return fnt, nil

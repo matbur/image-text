@@ -33,9 +33,9 @@ func KnownFormatStrings() []string {
 }
 
 var (
-	errorMissing    = errors.New("missing value")
-	errorMalformed  = errors.New("malformed value")
-	errorUnexpected = errors.New("unexpected error")
+	ErrMissing    = errors.New("missing value")
+	ErrMalformed  = errors.New("malformed value")
+	ErrUnexpected = errors.New("unexpected error")
 )
 
 type Image struct {

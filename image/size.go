@@ -22,7 +22,7 @@ func NewSize(width, height int) Size {
 
 func NewSizeFromString(s string) (Size, error) {
 	if s == "" {
-		return DefaultSize(), fmt.Errorf("size is empty: %w", errorMissing)
+		return DefaultSize(), fmt.Errorf("size is empty: %w", ErrMissing)
 	}
 
 	s = strings.ToLower(s)
@@ -33,17 +33,17 @@ func NewSizeFromString(s string) (Size, error) {
 
 	ss := sizePattern.FindStringSubmatch(s)
 	if len(ss) != 3 {
-		return DefaultSize(), fmt.Errorf("size '%s' is not valid: %w", s, errorMalformed)
+		return DefaultSize(), fmt.Errorf("size '%s' is not valid: %w", s, ErrMalformed)
 	}
 
 	width, err := strconv.Atoi(ss[1])
 	if err != nil {
-		return DefaultSize(), fmt.Errorf("bad width '%s': %v: %w", ss[1], err, errorUnexpected)
+		return DefaultSize(), fmt.Errorf("bad width '%s': %v: %w", ss[1], err, ErrUnexpected)
 	}
 
 	height, err := strconv.Atoi(ss[2])
 	if err != nil {
-		return DefaultSize(), fmt.Errorf("bad height '%s': %v: %w", ss[2], err, errorUnexpected)
+		return DefaultSize(), fmt.Errorf("bad height '%s': %v: %w", ss[2], err, ErrUnexpected)
 	}
 
 	return NewSize(width, height), nil

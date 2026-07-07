@@ -118,13 +118,13 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 
 		img, err := image.New(size, bgColor, fgColor, text, font, format)
 		if err != nil {
-			writeJSON(w, err.Error(), http.StatusBadRequest)
+			writeJSON(w, imageErrorCode(err), err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		var buf bytes.Buffer
 		if err := img.Draw(&buf); err != nil {
-			writeJSON(w, err.Error(), http.StatusInternalServerError)
+			writeJSON(w, CodeEncodeError, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -175,7 +175,7 @@ func handleFontStatic(w http.ResponseWriter, r *http.Request) {
 
 	filename, err := url.PathUnescape(r.PathValue("filename"))
 	if err != nil {
-		writeJSON(w, "malformed font path", http.StatusBadRequest)
+		writeJSON(w, CodeBadRequest, "malformed font path", http.StatusBadRequest)
 		return
 	}
 
@@ -304,7 +304,7 @@ func handleFavicon(w http.ResponseWriter, r *http.Request) {
 	bb, err := resources.Static.ReadFile("favicon.png")
 	if err != nil {
 		slog.Error("Failed to load favicon", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		writeJSON(w, CodeInternalError, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	if _, err := w.Write(bb); err != nil {
@@ -398,12 +398,26 @@ func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 	js, err := json.Marshal(payload)
 	if err != nil {
 		slog.Error("Failed to marshal docs", "err", err)
-		writeJSON(w, "Internal Server Error", http.StatusInternalServerError)
+		writeJSON(w, CodeInternalError, "Internal Server Error", http.StatusInternalServerError)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	if _, err := w.Write(js); err != nil {
 		slog.Error("Failed to write docs", "err", err)
+	}
+}
+
+func imageErrorCode(err error) string {
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "size"):
+		return CodeInvalidSize
+	case strings.Contains(msg, "color"):
+		return CodeInvalidColor
+	case strings.Contains(msg, "font"):
+		return CodeInvalidFont
+	default:
+		return CodeBadRequest
 	}
 }
 
