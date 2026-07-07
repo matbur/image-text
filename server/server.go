@@ -39,9 +39,11 @@ type Config struct {
 
 func NewServer(cfg Config) chi.Router {
 	r := chi.NewRouter()
+	metrics := getMetrics()
 
 	r.Use(middleware.RequestID)
 	r.Use(corsMiddleware(cfg.AllowedOrigins))
+	r.Use(metrics.middleware)
 	r.Use(requestLogger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
@@ -53,6 +55,7 @@ func NewServer(cfg Config) chi.Router {
 
 	r.Get("/healthz", handleHealthz)
 	r.Get("/readyz", handleReadyz)
+	r.Get("/metrics", prometheusHandler())
 	r.Get("/", handleMain)
 	r.Get("/online", handleOnlinePage)
 	r.Post("/online/post", handleOnlinePost)
@@ -62,7 +65,7 @@ func NewServer(cfg Config) chi.Router {
 	r.Get("/docs.json", handleDocsJSON)
 	r.Get("/resources/{filename}", handleStatic)
 	r.Get("/resources/fonts/{filename}", handleFontStatic)
-	r.Get("/{size}/{bg_color}/{fg_color}", cachedHandleImage(cache))
+	r.Get("/{size}/{bg_color}/{fg_color}", cachedHandleImage(cache, metrics))
 
 	return r
 }
@@ -83,7 +86,7 @@ func cacheKey(size, bgColor, fgColor, text, font, format string) string {
 	return fmt.Sprintf("%s/%s/%s?text=%s&font=%s&format=%s", size, bgColor, fgColor, text, font, format)
 }
 
-func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
+func cachedHandleImage(cache *lru.Cache[string, []byte], metrics *metricsCollector) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		begin := time.Now()
 
@@ -104,6 +107,7 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 
 		if cache != nil {
 			if bb, ok := cache.Get(key); ok {
+				metrics.cacheHit()
 				w.Write(bb)
 				slog.With(
 					"req_id", reqID,
@@ -114,6 +118,7 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 				).Info("Response")
 				return
 			}
+			metrics.cacheMiss()
 		}
 
 		img, err := image.New(size, bgColor, fgColor, text, font, format)
