@@ -25,6 +25,7 @@ type config struct {
 	RateLimitRequests int           `envconfig:"RATE_LIMIT_REQUESTS" default:"100"`
 	RateLimitWindow   time.Duration `envconfig:"RATE_LIMIT_WINDOW" default:"1m"`
 	CacheSize         int           `envconfig:"CACHE_SIZE" default:"512"`
+	AllowedOrigins    string        `envconfig:"CORS_ALLOWED_ORIGINS" default:"*"`
 }
 
 func init() {
@@ -46,6 +47,7 @@ func main() {
 		RateLimitRequests: cfg.RateLimitRequests,
 		RateLimitWindow:   cfg.RateLimitWindow,
 		CacheSize:         cfg.CacheSize,
+		AllowedOrigins:    cfg.AllowedOrigins,
 	}
 
 	switch cfg.Mode {

@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"slices"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
@@ -32,11 +34,13 @@ type Config struct {
 	RateLimitRequests int
 	RateLimitWindow   time.Duration
 	CacheSize         int
+	AllowedOrigins    string
 }
 
 func NewServer(cfg Config) chi.Router {
 	r := chi.NewRouter()
 
+	r.Use(corsMiddleware(cfg.AllowedOrigins))
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
@@ -395,6 +399,39 @@ func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	if _, err := w.Write(js); err != nil {
 		slog.Error("Failed to write docs", "err", err)
+	}
+}
+
+func corsMiddleware(allowedOrigins string) func(http.Handler) http.Handler {
+	origins := strings.Split(allowedOrigins, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
+	wildcard := origins[0] == "*"
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+
+			if wildcard || (origin != "" && slices.Contains(origins, origin)) {
+				if origin == "" {
+					w.Header().Set("Access-Control-Allow-Origin", "*")
+				} else {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					w.Header().Set("Vary", "Origin")
+				}
+			}
+
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, HX-Request, HX-Push-Url")
+				w.Header().Set("Access-Control-Max-Age", "86400")
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
 	}
 }
 
