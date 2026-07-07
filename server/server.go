@@ -40,8 +40,9 @@ type Config struct {
 func NewServer(cfg Config) chi.Router {
 	r := chi.NewRouter()
 
+	r.Use(middleware.RequestID)
 	r.Use(corsMiddleware(cfg.AllowedOrigins))
-	r.Use(middleware.Logger)
+	r.Use(requestLogger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/wasm", "application/octet-stream", "text/html", "text/css", "application/javascript", "image/svg+xml"))
 	if cfg.RateLimitRequests > 0 {
@@ -99,10 +100,13 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="image.%s"`, image.Extension(format)))
 		w.Header().Set("Content-Type", image.ContentType(format))
 
+		reqID := middleware.GetReqID(r.Context())
+
 		if cache != nil {
 			if bb, ok := cache.Get(key); ok {
 				w.Write(bb)
 				slog.With(
+					"req_id", reqID,
 					"response", "binary",
 					"cache", "hit",
 					"duration", time.Since(begin).String(),
@@ -133,6 +137,7 @@ func cachedHandleImage(cache *lru.Cache[string, []byte]) http.HandlerFunc {
 		w.Write(bb)
 
 		slog.With(
+			"req_id", reqID,
 			"response", "binary",
 			"duration", time.Since(begin).String(),
 			"status", http.StatusOK,
@@ -400,6 +405,26 @@ func handleDocsJSON(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(js); err != nil {
 		slog.Error("Failed to write docs", "err", err)
 	}
+}
+
+func requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqID := middleware.GetReqID(r.Context())
+		w.Header().Set("X-Request-Id", reqID)
+		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+		begin := time.Now()
+
+		next.ServeHTTP(ww, r)
+
+		slog.With(
+			"req_id", reqID,
+			"method", r.Method,
+			"path", r.URL.RequestURI(),
+			"status", ww.Status(),
+			"duration", time.Since(begin).String(),
+			"bytes", ww.BytesWritten(),
+		).Info("Request")
+	})
 }
 
 func corsMiddleware(allowedOrigins string) func(http.Handler) http.Handler {
