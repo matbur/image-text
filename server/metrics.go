@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -65,10 +66,28 @@ func (m *metricsCollector) middleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(ww, r)
 
+		routePath := routePattern(r)
 		status := strconv.Itoa(ww.Status())
-		m.reqCount.WithLabelValues(r.Method, r.URL.Path, status).Inc()
-		m.reqDuration.WithLabelValues(r.Method, r.URL.Path).Observe(time.Since(begin).Seconds())
+		m.reqCount.WithLabelValues(r.Method, routePath, status).Inc()
+		m.reqDuration.WithLabelValues(r.Method, routePath).Observe(time.Since(begin).Seconds())
 	})
+}
+
+// routePattern returns the matched chi route pattern (e.g.
+// "/{size}/{bg_color}/{fg_color}") rather than the raw request path. Using
+// the raw path as a metric label would create an unbounded number of time
+// series, since size/color/font segments are arbitrary user input. Requests
+// that don't match any route (404s, e.g. from bots probing random paths)
+// are bucketed under a single "not_found" label instead.
+func routePattern(r *http.Request) string {
+	rctx := chi.RouteContext(r.Context())
+	if rctx == nil {
+		return "unknown"
+	}
+	if p := rctx.RoutePattern(); p != "" {
+		return p
+	}
+	return "not_found"
 }
 
 func (m *metricsCollector) cacheHit() {
