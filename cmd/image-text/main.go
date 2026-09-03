@@ -29,9 +29,31 @@ type config struct {
 }
 
 func init() {
+	level, err := parseLogLevel(os.Getenv("LOG_LEVEL"))
+
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: level,
 	})))
+
+	if err != nil {
+		slog.Warn("Invalid LOG_LEVEL, falling back to default", "err", err, "default", level.String())
+	}
+}
+
+// parseLogLevel parses a log level string (e.g. "debug", "info", "warn",
+// "error") into a slog.Level. An empty string defaults to slog.LevelInfo
+// without error. On any parse error it also returns slog.LevelInfo.
+func parseLogLevel(s string) (slog.Level, error) {
+	if s == "" {
+		return slog.LevelInfo, nil
+	}
+
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(s)); err != nil {
+		return slog.LevelInfo, err
+	}
+
+	return level, nil
 }
 
 func main() {

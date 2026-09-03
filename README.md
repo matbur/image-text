@@ -42,6 +42,7 @@ Environment variables:
 | `RATE_LIMIT_REQUESTS` | `100`  | Max requests per IP per window |
 | `RATE_LIMIT_WINDOW`   | `1m`   | Rate limit window duration   |
 | `CACHE_SIZE`          | `512`  | In-memory image cache entries (`0` to disable) |
+| `LOG_LEVEL`           | `info` | Log level (`debug`, `info`, `warn`, `error`) |
 
 ## Web UI
 
