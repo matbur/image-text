@@ -52,10 +52,24 @@ func TestNewSizeFromString(t *testing.T) {
 			err:    true,
 		},
 		{
-			name:   "with big value",
+			name:   "with value above max dimension",
 			arg:    "1x999999",
-			width:  1,
-			height: 999999,
+			width:  image.DefaultSize().Width(),
+			height: image.DefaultSize().Height(),
+			err:    true,
+		},
+		{
+			name:   "at max dimension",
+			arg:    "4096x4096",
+			width:  4096,
+			height: 4096,
+		},
+		{
+			name:   "just above max dimension",
+			arg:    "4097x100",
+			width:  image.DefaultSize().Width(),
+			height: image.DefaultSize().Height(),
+			err:    true,
 		},
 		{
 			name:   "valid size",

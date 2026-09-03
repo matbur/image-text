@@ -9,6 +9,11 @@ import (
 
 var sizePattern = regexp.MustCompile(`^([1-9][0-9]{0,5})x([1-9][0-9]{0,5})$`)
 
+// MaxDimension is the largest width or height (in pixels) accepted for a
+// generated image. It caps memory allocation for the underlying image
+// buffer and comfortably covers all knownSizes (largest is 2560x1600).
+const MaxDimension = 4096
+
 type Size struct {
 	width, height int
 }
@@ -44,6 +49,10 @@ func NewSizeFromString(s string) (Size, error) {
 	height, err := strconv.Atoi(ss[2])
 	if err != nil {
 		return DefaultSize(), fmt.Errorf("bad height '%s': %v: %w", ss[2], err, ErrUnexpected)
+	}
+
+	if width > MaxDimension || height > MaxDimension {
+		return DefaultSize(), fmt.Errorf("size '%s' exceeds max dimension %d: %w", s, MaxDimension, ErrMalformed)
 	}
 
 	return NewSize(width, height), nil
